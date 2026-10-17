@@ -1,5 +1,5 @@
 /* Sin conexión: guarda las páginas visitadas y los archivos. Páginas: primero la red; archivos: primero la copia. (Copiado de Crewdays) */
-var C = "ep-v2";
+var C = "ep-v3";
 self.addEventListener("install", function (e) { e.waitUntil(caches.open(C).then(function (c) { return c.addAll(["/", "/js/engine.js", "/js/calc.js", "/favicon.svg", "/fonts/inter-latin-wght.woff2"]); })); self.skipWaiting(); });
 self.addEventListener("activate", function (e) { e.waitUntil(caches.keys().then(function (k) { return Promise.all(k.filter(function (x) { return x !== C; }).map(function (x) { return caches.delete(x); })); })); self.clients.claim(); });
 self.addEventListener("fetch", function (e) {
