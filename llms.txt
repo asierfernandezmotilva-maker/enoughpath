@@ -1,0 +1,21 @@
+# Enough Path
+
+> Free FIRE (financial independence, retire early) calculators and guides for readers in the United States. Every figure is in today's dollars and is computed by the same open formulas the calculators use. Educational information only, not financial advice. Edited by Asier Fernández.
+
+Returns typed before inflation are converted with the exact Fisher formula (7% with 3% inflation is 3.88% real). Formulas, default assumptions and the automated tests are listed in the methodology.
+
+## Calculators
+- [FIRE calculator](https://enoughpath.com/calculators/fire-calculator/): your FIRE number and the age you reach it for lean, regular and fat FIRE with the same assumptions. Example: $40,000 a year at a 4% withdrawal rate needs $1,000,000.
+- [Coast FIRE calculator](https://enoughpath.com/calculators/coast-fire-calculator/): how much you need invested today to reach your FIRE number by retirement with no more saving. Example: $231,377 at 35 grows to $1,000,000 by 65 at 5% a year after inflation.
+
+## Guides
+- [What is FIRE? Financial independence in numbers](https://enoughpath.com/fire-basics/what-is-fire/): What financial independence means, the five versions and how much each one costs.
+- [The 4% rule explained](https://enoughpath.com/fire-basics/4-percent-rule/): Where the 4% rule comes from, how long a portfolio lasts at each rate and what the rule leaves out.
+- [How to calculate your FIRE number](https://enoughpath.com/fire-basics/fire-number/): The formula, three worked examples, a table by spending level and how other income lowers it.
+- [Lean, regular, fat, coast and barista FIRE compared](https://enoughpath.com/fire-basics/lean-fat-coast-barista-fire/): All five types for the same household: portfolio needed, age reached and what each one asks of you.
+- [Coast FIRE: how much you need by age](https://enoughpath.com/fire-by-age/coast-fire/): What coast FIRE means and the amount you need at 25, 30, 35, 40 and 45.
+
+## About
+- [Methodology](https://enoughpath.com/methodology/): every formula, default assumption and test.
+- [Editorial policy](https://enoughpath.com/editorial-policy/): how pages are written, checked against primary sources and corrected, including the use of AI.
+- [About](https://enoughpath.com/about/) and [disclaimer](https://enoughpath.com/disclaimer/). Contact: asierfernandezmotilva@gmail.com
