@@ -53,6 +53,15 @@
     var k = 0; while (k < 98 && p[k + 1] <= v) k++;
     return k + 1 + (v - p[k]) / (p[k + 1] - p[k]);
   }
-  return { percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
+  // Retirada año a año con una lista de rentabilidades reales: saldo = (saldo − w) × (1 + r). Devuelve el saldo al empezar
+  // cada año (el primero es p); si el saldo no llega para la retirada, la cartera se agota y la lista acaba en 0.
+  function withdrawPath(p, w, returns) {
+    var out = [p];
+    for (var i = 0; i < returns.length; i++) { if (p < w) { out.push(0); break; } p = (p - w) * (1 + returns[i]); out.push(p); }
+    return out;
+  }
+  // Media geométrica (la rentabilidad anual compuesta equivalente)
+  function geoMean(returns) { return Math.pow(returns.reduce(function (a, r) { return a * (1 + r); }, 1), 1 / returns.length) - 1; }
+  return { withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
     balance: balance, yearsToTarget: yearsToTarget, coastNumber: coastNumber, yearsToCoast: yearsToCoast };
 });
