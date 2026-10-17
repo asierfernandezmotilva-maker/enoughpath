@@ -4,7 +4,8 @@
   var DEFAULTS = {
     fire: { v: "fire", lean: 25000, fire: 40000, fat: 100000, p: 100000, s: 25000, age: 35, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
     coast: { age: 35, ret: 65, spend: 40000, wr: 4, p: 100000, s: 15000, mode: "real", real: 5, nom: 7, inf: 3 },
-    nw: { age: 35, nw: 150000 }
+    nw: { age: 35, nw: 150000 },
+    last: { p: 1000000, w: 40000, age: 45, mode: "real", real: 3, nom: 6, inf: 3 }
   };
   var CHOICES = { v: ["lean", "fire", "fat"], mode: ["real", "nominal"] };
   var NAME = { lean: "Lean FIRE", fire: "FIRE", fat: "Fat FIRE" };
@@ -132,6 +133,30 @@
     return out;
   }
   function read(form, kind) { var out = {}; Object.keys(DEFAULTS[kind]).forEach(function (k) { out[k] = CHOICES[k] ? form.elements[k].value : SIGNED[k] ? snum(form.elements[k].value) : num(form.elements[k].value); }); return out; }
+  // ---------- ¿Cuánto dura mi dinero? Rentabilidad fija y prueba con dos años malos al principio ----------
+  var BAD = [-0.2, -0.1];
+  function lastFor(v) { var r = rate(v); return { r: r, t: E.yearsLasts(v.p, v.w, r), ts: E.yearsOnPath(v.p, v.w, BAD.concat(Array(98).fill(r))) }; }
+  function howLong(t) { return !isFinite(t) ? "Indefinitely" : t > 100 ? "More than 100 years" : yrs(t); }
+  function lastHTML(v) {
+    var L = lastFor(v), ok = v.w > 0 && v.p > 0, fin = isFinite(L.t) && L.t <= 100;
+    var tab = !ok ? "Not set" : fin ? "Until about age " + Math.floor(v.age + L.t) : "Lasts";
+    var dist = !ok ? (v.p > 0 ? "Enter how much you take out each year." : "Enter how much you have invested.") : usd(v.w) + " a year, " + pct(v.p > 0 ? v.w / v.p : 0) + " of " + usd(v.p) + ", with " + pct(L.r) + " a year after inflation.";
+    var fine = !ok ? "Amounts are in today's dollars." : "If the first two years fall 20% and 10% and later years earn the same: " + howLong(L.ts).toLowerCase() + ".";
+    var end = Math.max(isFinite(L.t) ? L.t : 0, isFinite(L.ts) ? L.ts : 0), H = Math.min(60, Math.max(10, Math.ceil(end) + 3));
+    if (!isFinite(L.t) && !isFinite(L.ts)) H = 40;
+    var a = E.withdrawPath(v.p, v.w, Array(H).fill(L.r)), b = E.withdrawPath(v.p, v.w, BAD.concat(Array(H).fill(L.r)).slice(0, H));
+    var top = Math.max.apply(null, a.concat(b, [1])) * 1.1;
+    var at = function (path, i) { return i < path.length ? usd(path[i]) : usd(0); };
+    var rows = []; for (var i = 0; i <= H; i += 10) rows.push(i);
+    return {
+      sign: sign(tab, "Your money lasts", ok ? howLong(L.t) : "—", dist, fine),
+      chart: chart({ id: "lc", x0: v.age, x1: v.age + H, ymax: top, area: false, lines: [{ pts: a.map(function (x, i) { return [v.age + i, x]; }), cls: "you" }, { pts: b.map(function (x, i) { return [v.age + i, x]; }), cls: "need" }], hl: [], marks: [],
+        title: "Portfolio by age with a steady return and with two bad years first", desc: "With a steady return the money lasts " + howLong(L.t).toLowerCase() + "; with two bad years first, " + howLong(L.ts).toLowerCase() + "." }),
+      table: '<table class="t"><thead><tr><th scope="col">After</th><th scope="col">Age</th><th scope="col">Steady return</th><th scope="col">Two bad years first</th></tr></thead><tbody>' +
+        rows.map(function (i) { return '<tr><th scope="row">' + (i ? i + " years" : "Today") + "</th><td>" + (v.age + i) + "</td><td>" + at(a, i) + "</td><td>" + at(b, i) + "</td></tr>"; }).join("") + "</tbody></table>",
+      data: "", note: rateNote(v)
+    };
+  }
   // ---------- Patrimonio por edad (SCF 2025 de la Reserva Federal) ----------
   var GROUPS = [["under-35", "under 35", 34], ["35-44", "35 to 44", 44], ["45-54", "45 to 54", 54], ["55-64", "55 to 64", 64], ["65-74", "65 to 74", 74], ["75-plus", "75 or older", Infinity]];
   function group(age) { for (var i = 0; i < GROUPS.length; i++) if (age <= GROUPS[i][2]) return GROUPS[i]; }
@@ -154,12 +179,12 @@
       data: "", note: ""
     };
   }
-  var HTML = { fire: fireHTML, coast: coastHTML, nw: nwHTML };
+  var HTML = { fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML };
 
   if (typeof document !== "undefined") Array.prototype.forEach.call(document.querySelectorAll("form[data-calc]"), function (f) {
     var kind = f.getAttribute("data-calc"), timer, sent = false;
     var render = function (v) { var h = HTML[kind](v); for (var k in h) { var el = document.getElementById(kind + "-" + k); if (el && el.innerHTML !== h[k]) el.innerHTML = h[k]; } };
-    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|lean|fire|fat|spend|nw)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
+    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|w|lean|fire|fat|spend|nw)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
     if (location.hash.length > 1) { var v0 = fromHash(location.hash, kind); write(v0); render(v0); }
     f.addEventListener("input", function () {
       var v = read(f, kind); render(v); clearTimeout(timer);
@@ -176,5 +201,5 @@
   });
   if (typeof navigator !== "undefined" && "serviceWorker" in navigator && /^(https:|http:\/\/localhost)/.test(location.href)) navigator.serviceWorker.register("/sw.js").catch(function () {});
 
-  return { nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
+  return { lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
 });

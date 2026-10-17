@@ -62,6 +62,13 @@
   }
   // Media geométrica (la rentabilidad anual compuesta equivalente)
   function geoMean(returns) { return Math.pow(returns.reduce(function (a, r) { return a * (1 + r); }, 1), 1 / returns.length) - 1; }
-  return { withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
+  // Años que dura p retirando w al principio de cada año con una lista de rentabilidades. El último año parcial cuenta como
+  // la fracción de retirada que aún se puede pagar (saldo / w). Infinity si la lista se acaba y todavía queda para retirar.
+  function yearsOnPath(p, w, returns) {
+    if (!(w > 0)) return Infinity;
+    for (var i = 0; i < returns.length; i++) { if (p < w) return i + p / w; p = (p - w) * (1 + returns[i]); }
+    return p < w ? returns.length + p / w : Infinity;
+  }
+  return { yearsOnPath: yearsOnPath, withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
     balance: balance, yearsToTarget: yearsToTarget, coastNumber: coastNumber, yearsToCoast: yearsToCoast };
 });
