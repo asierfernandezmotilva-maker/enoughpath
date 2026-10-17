@@ -149,8 +149,8 @@
     return {
       sign: sign(r.g[0] === "under-35" ? "Under 35" : "Ages " + r.g[1], "Your net worth percentile", rank(r.q), dist, fine),
       chart: '<div class="pbar" role="img" aria-label="Your net worth is at about the ' + rank(r.q) + ' percentile of families headed by someone ' + r.g[1] + '"><p><i class="med" style="left:50%"></i><b style="left:clamp(24px, ' + at.toFixed(1) + '%, calc(100% - 24px))">You</b></p><span>0</span><span>Median</span><span>100</span></div>',
-      table: '<table class="t"><thead><tr><th scope="col">Percentile, ages ' + r.g[1] + '</th><th scope="col">Net worth (2025 dollars)</th></tr></thead><tbody>' +
-        rows.map(function (x) { return "<tr" + (x[2] ? ' class="on"' : "") + '><th scope="row">' + x[0] + "</th><td>" + money(x[1]) + "</td></tr>"; }).join("") + "</tbody></table>",
+      table: '<table class="t"><thead><tr><th scope="col">Percentile, ages ' + r.g[1] + '</th><th scope="col">Net worth (2025 dollars)</th><th scope="col">How far from you</th></tr></thead><tbody>' +
+        rows.map(function (x) { var d = x[1] - v.nw; return "<tr" + (x[2] ? ' class="on"' : "") + '><th scope="row">' + x[0] + "</th><td>" + money(x[1]) + "</td><td>" + (x[2] ? "" : d > 0 ? usd(d) + " more" : "Reached") + "</td></tr>"; }).join("") + "</tbody></table>",
       data: "", note: ""
     };
   }
