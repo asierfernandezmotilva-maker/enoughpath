@@ -7,6 +7,7 @@ Returns typed before inflation are converted with the exact Fisher formula (7% w
 ## Calculators
 - [FIRE calculator](https://enoughpath.com/calculators/fire-calculator/): your FIRE number and the age you reach it for lean, regular and fat FIRE with the same assumptions. Example: $40,000 a year at a 4% withdrawal rate needs $1,000,000.
 - [Coast FIRE calculator](https://enoughpath.com/calculators/coast-fire-calculator/): how much you need invested today to reach your FIRE number by retirement with no more saving. Example: $231,377 at 35 grows to $1,000,000 by 65 at 5% a year after inflation.
+- [Net worth by age calculator](https://enoughpath.com/calculators/net-worth-by-age/): your percentile among US families your age, from the Federal Reserve's 2025 Survey of Consumer Finances (median for all families: $216,100).
 
 ## Guides
 - [What is FIRE? Financial independence in numbers](https://enoughpath.com/fire-basics/what-is-fire/): What financial independence means, the five versions and how much each one costs.
@@ -14,6 +15,7 @@ Returns typed before inflation are converted with the exact Fisher formula (7% w
 - [How to calculate your FIRE number](https://enoughpath.com/fire-basics/fire-number/): The formula, three worked examples, a table by spending level and how other income lowers it.
 - [Lean, regular, fat, coast and barista FIRE compared](https://enoughpath.com/fire-basics/lean-fat-coast-barista-fire/): All five types for the same household: portfolio needed, age reached and what each one asks of you.
 - [Coast FIRE: how much you need by age](https://enoughpath.com/fire-by-age/coast-fire/): What coast FIRE means and the amount you need at 25, 30, 35, 40 and 45.
+- [Net worth by age in 2025: what the Fed's new survey shows](https://enoughpath.com/fire-by-age/net-worth-by-age-2025/): Median and average net worth by age from the Federal Reserve's 2025 survey, and what changed since 2022.
 
 ## About
 - [Methodology](https://enoughpath.com/methodology/): every formula, default assumption and test.

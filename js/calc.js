@@ -1,13 +1,16 @@
 /* Calculadoras FIRE y coast FIRE: resultados, tabla y gráfico SVG. tools/generar.js usa las mismas funciones para dejar
    el ejemplo ya calculado en el HTML; en el navegador solo se repinta al cambiar un dato o si la URL trae un escenario (#...). */
-(function (root, f) { if (typeof module === "object") module.exports = f(require("./engine.js")); else root.EP_CALC = f(root.EP_ENGINE); })(this, function (E) {
+(function (root, f) { if (typeof module === "object") module.exports = f(require("./engine.js"), require("../lib/scf.js")); else root.EP_CALC = f(root.EP_ENGINE, root.EP_SCF); })(this, function (E, SCF) {
   var DEFAULTS = {
     fire: { v: "fire", lean: 25000, fire: 40000, fat: 100000, p: 100000, s: 25000, age: 35, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
-    coast: { age: 35, ret: 65, spend: 40000, wr: 4, p: 100000, s: 15000, mode: "real", real: 5, nom: 7, inf: 3 }
+    coast: { age: 35, ret: 65, spend: 40000, wr: 4, p: 100000, s: 15000, mode: "real", real: 5, nom: 7, inf: 3 },
+    nw: { age: 35, nw: 150000 }
   };
   var CHOICES = { v: ["lean", "fire", "fat"], mode: ["real", "nominal"] };
   var NAME = { lean: "Lean FIRE", fire: "FIRE", fat: "Fat FIRE" };
 
+  var SIGNED = { nw: 1 }; // el patrimonio puede ser negativo (más deudas que bienes)
+  function snum(s) { var n = parseFloat(String(s).replace(/[^0-9.\-]/g, "")); return isFinite(n) ? n : 0; }
   function num(s) { var n = parseFloat(String(s).replace(/[^0-9.\-]/g, "")); return isFinite(n) && n > 0 ? n : 0; }
   function usd(n) { return isFinite(n) ? "$" + Math.round(n).toLocaleString("en-US") : "—"; }
   function short(n) { return n >= 1e6 ? "$" + +(n / 1e6).toFixed(2) + "M" : n >= 1e3 ? "$" + Math.round(n / 1e3) + "k" : "$" + Math.round(n); }
@@ -124,17 +127,39 @@
     var q = {}, out = {}; String(h).replace(/^#/, "").split("&").forEach(function (p) { var i = p.indexOf("="); if (i > 0) q[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1)); });
     Object.keys(DEFAULTS[kind]).forEach(function (k) {
       var d = DEFAULTS[kind][k], x = q[k];
-      out[k] = x == null ? d : CHOICES[k] ? (CHOICES[k].indexOf(x) >= 0 ? x : d) : /^\d+(\.\d+)?$/.test(x) ? +x : d;
+      out[k] = x == null ? d : CHOICES[k] ? (CHOICES[k].indexOf(x) >= 0 ? x : d) : (SIGNED[k] ? /^-?\d+(\.\d+)?$/ : /^\d+(\.\d+)?$/).test(x) ? +x : d;
     });
     return out;
   }
-  function read(form, kind) { var out = {}; Object.keys(DEFAULTS[kind]).forEach(function (k) { out[k] = CHOICES[k] ? form.elements[k].value : num(form.elements[k].value); }); return out; }
-  var HTML = { fire: fireHTML, coast: coastHTML };
+  function read(form, kind) { var out = {}; Object.keys(DEFAULTS[kind]).forEach(function (k) { out[k] = CHOICES[k] ? form.elements[k].value : SIGNED[k] ? snum(form.elements[k].value) : num(form.elements[k].value); }); return out; }
+  // ---------- Patrimonio por edad (SCF 2025 de la Reserva Federal) ----------
+  var GROUPS = [["under-35", "under 35", 34], ["35-44", "35 to 44", 44], ["45-54", "45 to 54", 54], ["55-64", "55 to 64", 64], ["65-74", "65 to 74", 74], ["75-plus", "75 or older", Infinity]];
+  function group(age) { for (var i = 0; i < GROUPS.length; i++) if (age <= GROUPS[i][2]) return GROUPS[i]; }
+  function ordinal(n) { var t = n % 100, u = n % 10; return n + (t >= 11 && t <= 13 ? "th" : u === 1 ? "st" : u === 2 ? "nd" : u === 3 ? "rd" : "th"); }
+  function rank(q) { return q <= 0 ? "Below the 1st" : q >= 100 ? "Above the 99th" : ordinal(Math.min(99, Math.max(1, Math.round(q)))); }
+  function money(n) { return n < 0 ? "−" + usd(-n) : usd(n); }
+  function nw(v) { var g = group(v.age), p = SCF.p[g[0]]; return { g: g, p: p, q: E.percentileOf(p, v.nw), all: E.percentileOf(SCF.p.all, v.nw), median: SCF.official.median[g[0]]["2025"] * 1000 }; }
+  function nwHTML(v) {
+    var r = nw(v), share = Math.min(99, Math.max(1, Math.round(r.q)));
+    var dist = "Median for families headed by someone " + r.g[1] + ": " + usd(r.median) + ". The top 10% start at " + usd(r.p[89]) + ".";
+    var fine = r.q <= 0 || r.q >= 100 ? "Among all US families: " + rank(r.all).toLowerCase() + " percentile." : "Higher than about " + share + "% of families your age. Among all US families: " + rank(r.all) + " percentile.";
+    var rows = [[10, "10th"], [25, "25th"], [50, "50th (median)"], [75, "75th"], [90, "90th"], [95, "95th"], [99, "99th"]].map(function (x) { return [x[1], r.p[x[0] - 1], false]; });
+    rows.push(["Your net worth", v.nw, true]); rows.sort(function (a, b) { return a[1] - b[1] || (a[2] ? 1 : -1); });
+    var at = Math.min(100, Math.max(0, r.q));
+    return {
+      sign: sign(r.g[0] === "under-35" ? "Under 35" : "Ages " + r.g[1], "Your net worth percentile", rank(r.q), dist, fine),
+      chart: '<div class="pbar" role="img" aria-label="Your net worth is at about the ' + rank(r.q) + ' percentile of families headed by someone ' + r.g[1] + '"><p><i class="med" style="left:50%"></i><b style="left:clamp(24px, ' + at.toFixed(1) + '%, calc(100% - 24px))">You</b></p><span>0</span><span>Median</span><span>100</span></div>',
+      table: '<table class="t"><thead><tr><th scope="col">Percentile, ages ' + r.g[1] + '</th><th scope="col">Net worth (2025 dollars)</th></tr></thead><tbody>' +
+        rows.map(function (x) { return "<tr" + (x[2] ? ' class="on"' : "") + '><th scope="row">' + x[0] + "</th><td>" + money(x[1]) + "</td></tr>"; }).join("") + "</tbody></table>",
+      data: "", note: ""
+    };
+  }
+  var HTML = { fire: fireHTML, coast: coastHTML, nw: nwHTML };
 
   if (typeof document !== "undefined") Array.prototype.forEach.call(document.querySelectorAll("form[data-calc]"), function (f) {
     var kind = f.getAttribute("data-calc"), timer, sent = false;
     var render = function (v) { var h = HTML[kind](v); for (var k in h) { var el = document.getElementById(kind + "-" + k); if (el && el.innerHTML !== h[k]) el.innerHTML = h[k]; } };
-    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|lean|fire|fat|spend)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
+    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|lean|fire|fat|spend|nw)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
     if (location.hash.length > 1) { var v0 = fromHash(location.hash, kind); write(v0); render(v0); }
     f.addEventListener("input", function () {
       var v = read(f, kind); render(v); clearTimeout(timer);
@@ -151,5 +176,5 @@
   });
   if (typeof navigator !== "undefined" && "serviceWorker" in navigator && /^(https:|http:\/\/localhost)/.test(location.href)) navigator.serviceWorker.register("/sw.js").catch(function () {});
 
-  return { chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
+  return { nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
 });

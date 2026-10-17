@@ -45,6 +45,14 @@
     if (r === 0) return Math.max(0, (target - p0) / n);
     var g = Math.pow(1 + r, n); return Math.max(0, (target - p0 * g) * r / (g - 1));
   }
-  return { savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
+  // Percentil de v en una lista ordenada de percentiles p1..p99 (índice 0 = p1), con interpolación lineal.
+  // 0 = por debajo del p1; 100 = por encima del p99. Con valores repetidos (p. ej. varios 0) toma el percentil más alto.
+  function percentileOf(p, v) {
+    if (v < p[0]) return 0;
+    if (v >= p[98]) return v > p[98] ? 100 : 99;
+    var k = 0; while (k < 98 && p[k + 1] <= v) k++;
+    return k + 1 + (v - p[k]) / (p[k + 1] - p[k]);
+  }
+  return { percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
     balance: balance, yearsToTarget: yearsToTarget, coastNumber: coastNumber, yearsToCoast: yearsToCoast };
 });
