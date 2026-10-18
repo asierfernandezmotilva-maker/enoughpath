@@ -82,6 +82,16 @@
     if (m >= 0) return 1 + Math.min(m, 36) * 2 / 300;
     var e = -m; return 1 - Math.min(e, 36) * 5 / 900 - Math.max(e - 36, 0) * 5 / 1200;
   }
+  // Interés simple: solo sobre el capital inicial
+  function simpleInterest(p, r, t) { return p * r * t; }
+  // APY a partir del tipo nominal (APR) con n capitalizaciones al año; Regulation DD: APY = (1 + interés/capital)^(365/días) − 1
+  function apy(apr, n) { return n === Infinity ? Math.exp(apr) - 1 : Math.pow(1 + apr / n, n) - 1; }
+  // Valor futuro: pv hoy, tipo r por periodo, n periodos, pago pmt por periodo (due = al principio del periodo)
+  function fv(pv, r, n, pmt, due) { var g = Math.pow(1 + r, n); return pv * g + (r === 0 ? pmt * n : pmt * (g - 1) / r * (due ? 1 + r : 1)); }
+  // Inversión año a año: aportación c al final del primer año que crece un g al año, rentabilidad r menos comisión fee
+  function invest(p, c, g, r, fee, years) { var b = p, out = [p]; for (var t = 1; t <= years; t++) { b = b * (1 + r - fee) + c * Math.pow(1 + g, t - 1); out.push(b); } return out; }
+  // Social Security: PIA = 90 % del AIME hasta b1 + 32 % hasta b2 + 15 % por encima, redondeado a la décima de dólar inferior
+  function pia(aime, b1, b2) { var x = 0.9 * Math.min(aime, b1) + 0.32 * Math.max(0, Math.min(aime, b2) - b1) + 0.15 * Math.max(0, aime - b2); return Math.floor(x * 10 + 1e-9) / 10; }
   // Media geométrica (la rentabilidad anual compuesta equivalente)
   function geoMean(returns) { return Math.pow(returns.reduce(function (a, r) { return a * (1 + r); }, 1), 1 / returns.length) - 1; }
   // Años que dura p retirando w al principio de cada año con una lista de rentabilidades. El último año parcial cuenta como
@@ -91,6 +101,6 @@
     for (var i = 0; i < returns.length; i++) { if (p < w) return i + p / w; p = (p - w) * (1 + returns[i]); }
     return p < w ? returns.length + p / w : Infinity;
   }
-  return { compound: compound, doubling: doubling, rule72: rule72, amortPayment: amortPayment, ssFactor: ssFactor, yearsWithIncome: yearsWithIncome, yearsOnPath: yearsOnPath, withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
+  return { simpleInterest: simpleInterest, apy: apy, fv: fv, invest: invest, pia: pia, compound: compound, doubling: doubling, rule72: rule72, amortPayment: amortPayment, ssFactor: ssFactor, yearsWithIncome: yearsWithIncome, yearsOnPath: yearsOnPath, withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
     balance: balance, yearsToTarget: yearsToTarget, coastNumber: coastNumber, yearsToCoast: yearsToCoast };
 });

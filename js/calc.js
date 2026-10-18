@@ -15,9 +15,13 @@
     bar: { age: 35, p: 150000, s: 20000, spend: 50000, inc: 25000, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
     rmd: { age: 75, bal: 500000, rate: 5 },
     sepp: { age: 50, bal: 500000, rate: 5 },
-    inf: { amt: 1000, from: 2000, to: 2025 }
+    inf: { amt: 1000, from: 2000, to: 2025 },
+    int: { p: 10000, rate: 5, t: 5 },
+    inv: { p: 10000, c: 6000, g: 3, rate: 7, fee: 0.5, t: 25, inf: 3 },
+    fv: { pv: 1000, rate: 5, n: 10, pmt: 100, due: "end" },
+    apy: { apr: 5, cmp: "12", dep: 10000 }
   };
-  var CHOICES = { v: ["lean", "fire", "fat"], mode: ["real", "nominal"], n: ["12", "1"], m: ["3", "6", "9", "12"] };
+  var CHOICES = { v: ["lean", "fire", "fat"], mode: ["real", "nominal"], n: ["12", "1"], m: ["3", "6", "9", "12"], due: ["end", "begin"], cmp: ["1", "4", "12", "365", "cont"] };
   var NAME = { lean: "Lean FIRE", fire: "FIRE", fat: "Fat FIRE" };
 
   var SIGNED = { nw: 1 }; // el patrimonio puede ser negativo (más deudas que bienes)
@@ -317,12 +321,57 @@
       data: "", note: "Latest monthly figure: " + CPI.latest.value + " (" + CPI.latest.period + ")."
     };
   }
-  var HTML = { fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML, rmd: rmdHTML, sepp: seppHTML, inf: infHTML, ci: ciHTML, r72: r72HTML, nwc: nwcHTML, ssb: ssbHTML, ef: efHTML, re: reHTML, bar: barHTML };
+  // Interés simple frente a compuesto
+  function intHTML(v) {
+    var r = v.rate / 100, T = Math.max(1, Math.round(v.t)), si = E.simpleInterest(v.p, r, v.t), ciy = E.compound(v.p, 0, r, v.t, 1) - v.p, a = [], b = [];
+    for (var t = 0; t <= T; t++) { a.push([t, v.p + E.simpleInterest(v.p, r, t)]); b.push([t, E.compound(v.p, 0, r, t, 1)]); }
+    return {
+      sign: sign(T + (T === 1 ? " year" : " years"), "Simple interest", usd(si), usd(v.p) + " × " + pct(r) + " × " + +v.t + (v.t === 1 ? " year" : " years") + " = " + usd(si) + ", for a total of " + usd(v.p + si) + ".", "Compounded yearly instead, the interest would be " + usd(ciy) + ", " + usd(ciy - si) + " more."),
+      chart: chart({ id: "int", x0: 0, x1: T, ymax: Math.max(b[T][1], 1) * 1.1, area: false, lines: [{ pts: a, cls: "you" }, { pts: b, cls: "need" }], hl: [], marks: [], title: "Balance with simple and with compound interest", desc: "After " + T + " years: " + usd(a[T][1]) + " with simple interest and " + usd(b[T][1]) + " compounded yearly." }),
+      table: tbl(["Year", "Simple interest", "Balance", "Compounded yearly"], a.filter(function (x, i) { return T <= 10 || i % 5 === 0 || i === T; }).map(function (x) { return onRow([x[0], usd(x[1] - v.p), usd(x[1]), usd(b[x[0]][1])], x[0] === T); })),
+      data: "", note: "Simple interest is paid on the original amount only. Black line: simple; grey dashed: compounded yearly."
+    };
+  }
+  // Inversión con aportación que sube cada año, comisión y resultado en dólares de hoy
+  function inv(v) { var T = Math.max(1, Math.round(v.t)), r = v.rate / 100, path = E.invest(v.p, v.c, v.g / 100, r, v.fee / 100, T), noFee = E.invest(v.p, v.c, v.g / 100, r, 0, T), put = v.p; for (var t = 1; t <= T; t++) put += v.c * Math.pow(1 + v.g / 100, t - 1); return { T: T, path: path, end: path[T], real: path[T] / Math.pow(1 + v.inf / 100, T), put: put, feeCost: noFee[T] - path[T] }; }
+  function invHTML(v) {
+    var x = inv(v), put = [], acc = v.p; put.push([0, v.p]); for (var t = 1; t <= x.T; t++) { acc += v.c * Math.pow(1 + v.g / 100, t - 1); put.push([t, acc]); }
+    var rows = []; for (var y = 0; y <= x.T; y += x.T > 20 ? 5 : x.T > 10 ? 2 : 1) rows.push(y); if (rows[rows.length - 1] !== x.T) rows.push(x.T);
+    return {
+      sign: sign("After " + x.T + " years", "Your investment", usd(x.end), "You put in " + usd(x.put) + "; growth adds " + usd(x.end - x.put) + ". In today's dollars: " + usd(x.real) + ".", "Fees of " + pct(v.fee / 100) + " a year cost " + usd(x.feeCost) + " over the period."),
+      chart: chart({ id: "inv", x0: 0, x1: x.T, ymax: Math.max(x.end, 1) * 1.1, lines: [{ pts: x.path.map(function (b, i) { return [i, b]; }), cls: "you" }, { pts: put, cls: "need" }], hl: [], marks: [], title: "Investment balance and money put in", desc: "The balance reaches " + usd(x.end) + " after " + x.T + " years." }),
+      table: tbl(["Year", "Money put in", "Balance", "In today's dollars"], rows.map(function (y) { return onRow([y, usd(put[y][1]), usd(x.path[y]), usd(x.path[y] / Math.pow(1 + v.inf / 100, y))], y === x.T); })),
+      data: "", note: "Contributions are added at the end of each year and rise by " + pct(v.g / 100) + " a year. The return is before inflation; fees come out of it."
+    };
+  }
+  // Valor futuro de una cantidad y de pagos periódicos
+  function fvHTML(v) {
+    var r = v.rate / 100, n = Math.max(0, Math.round(v.n)), due = v.due === "begin", tot = E.fv(v.pv, r, n, v.pmt, due), a = E.fv(v.pv, r, n, 0, false), pts = [];
+    for (var t = 0; t <= n; t++) pts.push([t, E.fv(v.pv, r, t, v.pmt, due)]);
+    return {
+      sign: sign(n + " periods", "Future value", usd(tot), "The lump sum grows to " + usd(a) + " and the payments to " + usd(tot - a) + ".", "At " + pct(r) + " per period, payments at the " + (due ? "start" : "end") + " of each period."),
+      chart: n ? chart({ id: "fv", x0: 0, x1: n, ymax: Math.max(tot, 1) * 1.1, lines: [{ pts: pts, cls: "you" }], hl: [], marks: [], title: "Future value by period", desc: "The future value after " + n + " periods is " + usd(tot) + "." }) : "",
+      table: tbl(["Period", "Future value"], pts.filter(function (p, i) { return n <= 12 || i % 5 === 0 || i === n; }).map(function (p) { return onRow([p[0], usd(p[1])], p[0] === n); })),
+      data: "", note: "FV = PV × (1 + r)ⁿ + PMT × [(1 + r)ⁿ − 1] ÷ r" + (due ? " × (1 + r), because payments come at the start of each period." : ".")
+    };
+  }
+  // APY a partir del APR según la frecuencia de capitalización
+  var CMP = { "1": ["Yearly", 1], "4": ["Quarterly", 4], "12": ["Monthly", 12], "365": ["Daily", 365], cont: ["Continuous", Infinity] };
+  function apyHTML(v) {
+    var r = v.apr / 100, c = CMP[v.cmp] || CMP["12"], y = E.apy(r, c[1]);
+    return {
+      sign: sign(c[0], "APY", pct(Math.round(y * 1e6) / 1e6), "An APR of " + pct(r) + " compounded " + c[0].toLowerCase() + " earns " + pct(Math.round(y * 1e6) / 1e6) + " in a year.", usd(v.dep) + " earns " + usd(v.dep * y) + " in interest in the first year."),
+      chart: bars(Object.keys(CMP).map(function (k) { return [CMP[k][0], v.dep * E.apy(r, CMP[k][1])]; })),
+      table: tbl(["Compounding", "APY", "Interest on " + usd(v.dep) + " in a year"], Object.keys(CMP).map(function (k) { var a = E.apy(r, CMP[k][1]); return onRow([CMP[k][0], pct(Math.round(a * 1e6) / 1e6), usd(v.dep * a)], k === v.cmp); })),
+      data: "", note: "APY = (1 + APR ÷ n)ⁿ − 1, where n is the number of compounding periods in a year."
+    };
+  }
+  var HTML = { int: intHTML, inv: invHTML, fv: fvHTML, apy: apyHTML, fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML, rmd: rmdHTML, sepp: seppHTML, inf: infHTML, ci: ciHTML, r72: r72HTML, nwc: nwcHTML, ssb: ssbHTML, ef: efHTML, re: reHTML, bar: barHTML };
 
   if (typeof document !== "undefined") Array.prototype.forEach.call(document.querySelectorAll("form[data-calc]"), function (f) {
     var kind = f.getAttribute("data-calc"), timer, sent = false;
     var render = function (v) { var h = HTML[kind](v); for (var k in h) { var el = document.getElementById(kind + "-" + k); if (el && el.innerHTML !== h[k]) el.innerHTML = h[k]; } };
-    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|w|lean|fire|fat|spend|nw|c|cash|inv|ret|home|car|other|mort|student|auto|cards|debt|pia|exp|have|inc|bal|amt)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
+    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|w|lean|fire|fat|spend|nw|c|cash|inv|ret|home|car|other|mort|student|auto|cards|debt|pia|exp|have|inc|bal|amt|pv|pmt|dep)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
     if (location.hash.length > 1) { var v0 = fromHash(location.hash, kind); write(v0); render(v0); }
     f.addEventListener("input", function () {
       var v = read(f, kind); render(v); clearTimeout(timer);
@@ -339,5 +388,5 @@
   });
   if (typeof navigator !== "undefined" && "serviceWorker" in navigator && /^(https:|http:\/\/localhost)/.test(location.href)) navigator.serviceWorker.register("/sw.js").catch(function () {});
 
-  return { ciHTML: ciHTML, r72HTML: r72HTML, nwcHTML: nwcHTML, ssbHTML: ssbHTML, efHTML: efHTML, reHTML: reHTML, barHTML: barHTML, rmdHTML: rmdHTML, seppHTML: seppHTML, infHTML: infHTML, ci: ci, nwc: nwc, ssb: ssb, ssMonthly: ssMonthly, re: re, bar: bar, lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
+  return { intHTML: intHTML, invHTML: invHTML, fvHTML: fvHTML, apyHTML: apyHTML, inv: inv, ciHTML: ciHTML, r72HTML: r72HTML, nwcHTML: nwcHTML, ssbHTML: ssbHTML, efHTML: efHTML, reHTML: reHTML, barHTML: barHTML, rmdHTML: rmdHTML, seppHTML: seppHTML, infHTML: infHTML, ci: ci, nwc: nwc, ssb: ssb, ssMonthly: ssMonthly, re: re, bar: bar, lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
 });
