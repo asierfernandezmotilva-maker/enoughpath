@@ -19,9 +19,13 @@
     int: { p: 10000, rate: 5, t: 5 },
     inv: { p: 10000, c: 6000, g: 3, rate: 7, fee: 0.5, t: 25, inf: 3 },
     fv: { pv: 1000, rate: 5, n: 10, pmt: 100, due: "end" },
-    apy: { apr: 5, cmp: "12", dep: 10000 }
+    apy: { apr: 5, cmp: "12", dep: 10000 },
+    k401: { age: 30, ret: 65, bal: 25000, sal: 70000, pct: 10, match: 50, matchMax: 6, raise: 2, rate: 7, fee: 0.3, inf: 3 },
+    roth: { age: 30, ret: 65, bal: 10000, c: 7500, rate: 7, inf: 3 },
+    cd: { dep: 10000, apy: 4, months: 12 },
+    div: { p: 100000, yld: 3.5, growth: 5, years: 20, drip: "yes" }
   };
-  var CHOICES = { v: ["lean", "fire", "fat"], mode: ["real", "nominal"], n: ["12", "1"], m: ["3", "6", "9", "12"], due: ["end", "begin"], cmp: ["1", "4", "12", "365", "cont"] };
+  var CHOICES = { v: ["lean", "fire", "fat"], mode: ["real", "nominal"], n: ["12", "1"], m: ["3", "6", "9", "12"], due: ["end", "begin"], cmp: ["1", "4", "12", "365", "cont"], drip: ["yes", "no"] };
   var NAME = { lean: "Lean FIRE", fire: "FIRE", fat: "Fat FIRE" };
 
   var SIGNED = { nw: 1 }; // el patrimonio puede ser negativo (más deudas que bienes)
@@ -366,12 +370,65 @@
       data: "", note: "APY = (1 + APR ÷ n)ⁿ − 1, where n is the number of compounding periods in a year."
     };
   }
-  var HTML = { int: intHTML, inv: invHTML, fv: fvHTML, apy: apyHTML, fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML, rmd: rmdHTML, sepp: seppHTML, inf: infHTML, ci: ciHTML, r72: r72HTML, nwc: nwcHTML, ssb: ssbHTML, ef: efHTML, re: reHTML, bar: barHTML };
+  // ---------- Semana 5: 401(k), Roth IRA, CD y dividendos. Límites del IRS para 2026 (IR-2025-111), en dólares de hoy ----------
+  var LIM = { k401: 24500, k401cu: 8000, k401cu6063: 11250, ira: 7500, iracu: 1100 };
+  function k401Limit(age) { return LIM.k401 + (age >= 60 && age <= 63 ? LIM.k401cu6063 : age >= 50 ? LIM.k401cu : 0); }
+  function k401(v) {
+    var n = Math.max(0, Math.round(v.ret - v.age)), you = [], emp = [], cont = [], capped = false;
+    for (var t = 0; t < n; t++) { var sal = v.sal * Math.pow(1 + v.raise / 100, t), want = sal * v.pct / 100, lim = k401Limit(v.age + t), y = Math.min(want, lim); if (want > lim) capped = true;
+      var m = sal * Math.min(v.pct, v.matchMax) / 100 * v.match / 100; you.push(y); emp.push(m); cont.push(y + m); }
+    var path = E.growPath(v.bal, cont, v.rate / 100, v.fee / 100), end = path[n];
+    return { n: n, path: path, end: end, real: end / Math.pow(1 + v.inf / 100, n), you: you.reduce(function (a, b) { return a + b; }, 0), emp: emp.reduce(function (a, b) { return a + b; }, 0), capped: capped, first: you[0] || 0, firstEmp: emp[0] || 0 };
+  }
+  function k401HTML(v) {
+    var x = k401(v), ok = x.n > 0, rows = []; for (var y = 0; y <= x.n; y += x.n > 20 ? 5 : 2) rows.push(y); if (ok && rows[rows.length - 1] !== x.n) rows.push(x.n);
+    return {
+      sign: sign(ok ? "At " + v.ret : "Not set", "401(k) balance at retirement", ok ? usd(x.end) : "—", ok ? "You put in " + usd(x.you) + " and your employer " + usd(x.emp) + ". In today's dollars: " + usd(x.real) + "." : "Set a retirement age above your age.", ok ? "This year: " + usd(x.first) + " from you and " + usd(x.firstEmp) + " in match." + (x.capped ? " Your contribution is capped at the IRS limit in some years." : "") : "2026 IRS limits."),
+      chart: ok ? chart({ id: "k401", x0: v.age, x1: v.ret, ymax: Math.max(x.end, 1) * 1.1, lines: [{ pts: x.path.map(function (b, i) { return [v.age + i, b]; }), cls: "you" }], hl: [], marks: [], title: "401(k) balance by age", desc: "The balance reaches " + usd(x.end) + " at " + v.ret + "." }) : "",
+      table: ok ? tbl(["Age", "Balance", "In today's dollars"], rows.map(function (y) { return onRow([v.age + y, usd(x.path[y]), usd(x.path[y] / Math.pow(1 + v.inf / 100, y))], y === x.n); })) : "",
+      data: "", note: "2026 IRS limits: " + usd(LIM.k401) + ", plus " + usd(LIM.k401cu) + " from 50 (" + usd(LIM.k401cu6063) + " at 60 to 63), kept in today's dollars. Before taxes."
+    };
+  }
+  function roth(v) { var n = Math.max(0, Math.round(v.ret - v.age)), cont = [], capped = false; for (var t = 0; t < n; t++) { var lim = LIM.ira + (v.age + t >= 50 ? LIM.iracu : 0); if (v.c > lim) capped = true; cont.push(Math.min(v.c, lim)); }
+    var path = E.growPath(v.bal, cont, v.rate / 100, 0), put = v.bal + cont.reduce(function (a, b) { return a + b; }, 0); return { n: n, path: path, end: path[n], put: put, real: path[n] / Math.pow(1 + v.inf / 100, n), capped: capped }; }
+  function rothHTML(v) {
+    var x = roth(v), ok = x.n > 0, rows = []; for (var y = 0; y <= x.n; y += x.n > 20 ? 5 : 2) rows.push(y); if (ok && rows[rows.length - 1] !== x.n) rows.push(x.n);
+    return {
+      sign: sign(ok ? "At " + v.ret : "Not set", "Roth IRA at retirement", ok ? usd(x.end) : "—", ok ? "You put in " + usd(x.put) + "; tax-free growth adds " + usd(x.end - x.put) + "." : "Set a retirement age above your age.", ok ? "In today's dollars: " + usd(x.real) + "." + (x.capped ? " Contributions are capped at the 2026 IRS limit." : "") : "2026 IRS limits."),
+      chart: ok ? chart({ id: "roth", x0: v.age, x1: v.ret, ymax: Math.max(x.end, 1) * 1.1, lines: [{ pts: x.path.map(function (b, i) { return [v.age + i, b]; }), cls: "you" }], hl: [], marks: [], title: "Roth IRA balance by age", desc: "The balance reaches " + usd(x.end) + " at " + v.ret + "." }) : "",
+      table: ok ? tbl(["Age", "Balance", "In today's dollars"], rows.map(function (y) { return onRow([v.age + y, usd(x.path[y]), usd(x.path[y] / Math.pow(1 + v.inf / 100, y))], y === x.n); })) : "",
+      data: "", note: "2026 IRS limit: " + usd(LIM.ira) + " a year, plus " + usd(LIM.iracu) + " from 50, kept in today's dollars. Qualified withdrawals are tax-free."
+    };
+  }
+  // CD: interés con el APY durante el plazo
+  function cdHTML(v) {
+    var y = v.apy / 100, int = function (m) { return v.dep * (Math.pow(1 + y, m / 12) - 1); };
+    return {
+      sign: sign(v.months + " months", "Interest earned", usd(int(v.months)), usd(v.dep) + " at " + pct(y) + " APY for " + v.months + " months ends at " + usd(v.dep + int(v.months)) + ".", "Before tax. Early withdrawal usually costs a penalty set by the bank."),
+      chart: bars([3, 6, 12, 24, 60].map(function (m) { return [m + " months", int(m)]; })),
+      table: tbl(["Term", "Interest", "Balance at maturity"], [3, 6, 9, 12, 18, 24, 36, 60].map(function (m) { return onRow([m + " months", usd(int(m)), usd(v.dep + int(m))], m === +v.months); })),
+      data: "", note: "Interest = deposit × [(1 + APY)^(months ÷ 12) − 1], the APY definition in Regulation DD."
+    };
+  }
+  // Dividendos: rentabilidad por dividendo constante, dividendos que crecen g al año, con o sin reinversión
+  function divHTML(v) {
+    var y = v.yld / 100, g = v.growth / 100, T = Math.max(1, Math.round(v.years)), drip = v.drip === "yes", a = [], b = [], cash = 0;
+    for (var t = 0; t <= T; t++) { a.push([t, v.p * Math.pow(1 + g, t) * Math.pow(1 + y, t)]); b.push([t, v.p * Math.pow(1 + g, t)]); }
+    for (var k = 0; k < T; k++) cash += y * v.p * Math.pow(1 + g, k);
+    var end = drip ? a[T][1] : b[T][1], inc = y * end;
+    return {
+      sign: sign(T + " years", "Yearly dividends after " + T + " years", usd(inc), "Today: " + usd(v.p * y) + " a year, " + usd(v.p * y / 12) + " a month, from " + usd(v.p) + " at " + pct(y) + ".", drip ? "Reinvesting every dividend, the holding grows to " + usd(end) + "." : "Taking the dividends as cash: " + usd(cash) + " in total over " + T + " years; the holding grows to " + usd(end) + "."),
+      chart: chart({ id: "div", x0: 0, x1: T, ymax: Math.max(a[T][1], 1) * 1.1, area: false, lines: [{ pts: a, cls: "you" }, { pts: b, cls: "need" }], hl: [], marks: [], title: "Holding value with and without reinvesting dividends", desc: "After " + T + " years: " + usd(a[T][1]) + " reinvesting and " + usd(b[T][1]) + " taking cash." }),
+      table: tbl(["Year", "Value, reinvesting", "Dividends that year", "Value, taking cash"], a.filter(function (p, i) { return T <= 10 || i % 5 === 0 || i === T; }).map(function (p) { return onRow([p[0], usd(p[1]), usd(y * (drip ? p[1] : b[p[0]][1])), usd(b[p[0]][1])], p[0] === T); })),
+      data: "", note: "Assumes the yield stays at " + pct(y) + " and dividends and price both grow " + pct(g) + " a year. Before taxes. Black line: reinvesting; grey dashed: taking cash."
+    };
+  }
+  var HTML = { k401: k401HTML, roth: rothHTML, cd: cdHTML, div: divHTML, int: intHTML, inv: invHTML, fv: fvHTML, apy: apyHTML, fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML, rmd: rmdHTML, sepp: seppHTML, inf: infHTML, ci: ciHTML, r72: r72HTML, nwc: nwcHTML, ssb: ssbHTML, ef: efHTML, re: reHTML, bar: barHTML };
 
   if (typeof document !== "undefined") Array.prototype.forEach.call(document.querySelectorAll("form[data-calc]"), function (f) {
     var kind = f.getAttribute("data-calc"), timer, sent = false;
     var render = function (v) { var h = HTML[kind](v); for (var k in h) { var el = document.getElementById(kind + "-" + k); if (el && el.innerHTML !== h[k]) el.innerHTML = h[k]; } };
-    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|w|lean|fire|fat|spend|nw|c|cash|inv|ret|home|car|other|mort|student|auto|cards|debt|pia|exp|have|inc|bal|amt|pv|pmt|dep)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
+    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|w|lean|fire|fat|spend|nw|c|cash|inv|ret|home|car|other|mort|student|auto|cards|debt|pia|exp|have|inc|bal|amt|pv|pmt|dep|sal)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
     if (location.hash.length > 1) { var v0 = fromHash(location.hash, kind); write(v0); render(v0); }
     f.addEventListener("input", function () {
       var v = read(f, kind); render(v); clearTimeout(timer);
@@ -388,5 +445,5 @@
   });
   if (typeof navigator !== "undefined" && "serviceWorker" in navigator && /^(https:|http:\/\/localhost)/.test(location.href)) navigator.serviceWorker.register("/sw.js").catch(function () {});
 
-  return { intHTML: intHTML, invHTML: invHTML, fvHTML: fvHTML, apyHTML: apyHTML, inv: inv, ciHTML: ciHTML, r72HTML: r72HTML, nwcHTML: nwcHTML, ssbHTML: ssbHTML, efHTML: efHTML, reHTML: reHTML, barHTML: barHTML, rmdHTML: rmdHTML, seppHTML: seppHTML, infHTML: infHTML, ci: ci, nwc: nwc, ssb: ssb, ssMonthly: ssMonthly, re: re, bar: bar, lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
+  return { k401HTML: k401HTML, rothHTML: rothHTML, cdHTML: cdHTML, divHTML: divHTML, k401: k401, roth: roth, LIM: LIM, intHTML: intHTML, invHTML: invHTML, fvHTML: fvHTML, apyHTML: apyHTML, inv: inv, ciHTML: ciHTML, r72HTML: r72HTML, nwcHTML: nwcHTML, ssbHTML: ssbHTML, efHTML: efHTML, reHTML: reHTML, barHTML: barHTML, rmdHTML: rmdHTML, seppHTML: seppHTML, infHTML: infHTML, ci: ci, nwc: nwc, ssb: ssb, ssMonthly: ssMonthly, re: re, bar: bar, lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
 });

@@ -92,6 +92,8 @@
   function invest(p, c, g, r, fee, years) { var b = p, out = [p]; for (var t = 1; t <= years; t++) { b = b * (1 + r - fee) + c * Math.pow(1 + g, t - 1); out.push(b); } return out; }
   // Social Security: PIA = 90 % del AIME hasta b1 + 32 % hasta b2 + 15 % por encima, redondeado a la décima de dólar inferior
   function pia(aime, b1, b2) { var x = 0.9 * Math.min(aime, b1) + 0.32 * Math.max(0, Math.min(aime, b2) - b1) + 0.15 * Math.max(0, aime - b2); return Math.floor(x * 10 + 1e-9) / 10; }
+  // Saldo año a año con aportaciones distintas cada año (contribs[t − 1] al final del año t), rentabilidad r menos comisión fee
+  function growPath(p, contribs, r, fee) { var b = p, out = [p]; for (var t = 0; t < contribs.length; t++) { b = b * (1 + r - fee) + contribs[t]; out.push(b); } return out; }
   // Media geométrica (la rentabilidad anual compuesta equivalente)
   function geoMean(returns) { return Math.pow(returns.reduce(function (a, r) { return a * (1 + r); }, 1), 1 / returns.length) - 1; }
   // Años que dura p retirando w al principio de cada año con una lista de rentabilidades. El último año parcial cuenta como
@@ -101,6 +103,6 @@
     for (var i = 0; i < returns.length; i++) { if (p < w) return i + p / w; p = (p - w) * (1 + returns[i]); }
     return p < w ? returns.length + p / w : Infinity;
   }
-  return { simpleInterest: simpleInterest, apy: apy, fv: fv, invest: invest, pia: pia, compound: compound, doubling: doubling, rule72: rule72, amortPayment: amortPayment, ssFactor: ssFactor, yearsWithIncome: yearsWithIncome, yearsOnPath: yearsOnPath, withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
+  return { growPath: growPath, simpleInterest: simpleInterest, apy: apy, fv: fv, invest: invest, pia: pia, compound: compound, doubling: doubling, rule72: rule72, amortPayment: amortPayment, ssFactor: ssFactor, yearsWithIncome: yearsWithIncome, yearsOnPath: yearsOnPath, withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
     balance: balance, yearsToTarget: yearsToTarget, coastNumber: coastNumber, yearsToCoast: yearsToCoast };
 });
