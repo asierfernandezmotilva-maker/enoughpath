@@ -10,25 +10,54 @@ Returns typed before inflation are converted with the exact Fisher formula (7% w
 - [How long will my money last calculator](https://enoughpath.com/calculators/how-long-will-my-money-last/): years a portfolio lasts at a fixed yearly withdrawal in today's dollars, with a test of two bad years at the start. Example: $40,000 a year from $1,000,000 at 3% real lasts 44.1 years.
 - [Net worth by age calculator](https://enoughpath.com/calculators/net-worth-by-age/): your percentile among US families your age, from the Federal Reserve's 2025 Survey of Consumer Finances (median for all families: $216,100).
 
+- [Compound interest calculator](https://enoughpath.com/calculators/compound-interest-calculator/): Your balance with monthly contributions, and how much of it is interest. $500 a month at 7% for 30 years grows to $609,985.
+- [Inflation calculator](https://enoughpath.com/calculators/inflation-calculator/): What a dollar amount from any year since 1913 is worth in another, from the official CPI. $100 of 2000 is $187 in 2025.
+- [Rule of 72 calculator](https://enoughpath.com/calculators/rule-of-72-calculator/): How long money takes to double at any return. At 8% the rule says 9 years; the exact answer is 9.01.
+- [Net worth calculator](https://enoughpath.com/calculators/net-worth-calculator/): Add up what you own and what you owe, and see your percentile among US families your age.
+- [RMD calculator](https://enoughpath.com/calculators/rmd-calculator/): Your required minimum distribution from the IRS table. At 75, $500,000 means at least $20,325 this year.
+- [72(t) calculator](https://enoughpath.com/calculators/72t-calculator/): Yearly SEPP payments before 59½ by the amortization and RMD methods, with the IRS life expectancy table.
+- [Retire early calculator](https://enoughpath.com/calculators/retire-early-calculator/): The age your savings could retire you, and the years to bridge before 59½ and Social Security.
+- [Social Security break-even calculator](https://enoughpath.com/calculators/social-security-break-even-calculator/): When waiting to claim pays more in total. Claiming at 67 instead of 62 breaks even at 78.7.
+- [Emergency fund calculator](https://enoughpath.com/calculators/emergency-fund-calculator/): Your target in months of essential costs, and how long it takes to save it.
+- [Barista FIRE calculator](https://enoughpath.com/calculators/barista-fire-calculator/): The portfolio you need when part-time work pays part of your spending: $625,000 for $50,000 a year with $25,000 of income.
+- [Interest calculator](https://enoughpath.com/calculators/interest-calculator/): Simple interest on any amount, and how much more compounding would give. $10,000 at 5% for 5 years earns $2,500.
+- [Investment calculator](https://enoughpath.com/calculators/investment-calculator/): What your money grows to with yearly contributions that rise, after fees, and in today's dollars.
+- [Future value calculator](https://enoughpath.com/calculators/future-value-calculator/): The future value of a lump sum and regular payments, at the start or end of each period.
+- [APY calculator](https://enoughpath.com/calculators/apy-calculator/): Convert an interest rate to its APY by compounding. 5% compounded monthly is 5.12%.
+- [401(k) calculator](https://enoughpath.com/calculators/401k-calculator/): Your 401(k) at retirement with the employer match, raises and fees, under the 2026 IRS limits.
+- [Roth IRA calculator](https://enoughpath.com/calculators/roth-ira-calculator/): Your tax-free balance at retirement. The 2026 maximum of $7,500 a year for 30 years at 7% grows to $708,456.
+- [CD calculator](https://enoughpath.com/calculators/cd-calculator/): Interest earned on a certificate of deposit from the APY and the term, with common terms side by side.
+- [Dividend calculator](https://enoughpath.com/calculators/dividend-calculator/): Dividend income from your investment and yield, and what reinvesting does. $100,000 at 3.5% pays $3,500 a year.
+
 ## Guides
+### FIRE basics
 - [What is FIRE? Financial independence in numbers](https://enoughpath.com/fire-basics/what-is-fire/): What financial independence means, the five versions and how much each one costs.
 - [The 4% rule explained](https://enoughpath.com/fire-basics/4-percent-rule/): Where the 4% rule comes from, how long a portfolio lasts at each rate and what the rule leaves out.
 - [How to calculate your FIRE number](https://enoughpath.com/fire-basics/fire-number/): The formula, three worked examples, a table by spending level and how other income lowers it.
 - [Lean, regular, fat, coast and barista FIRE compared](https://enoughpath.com/fire-basics/lean-fat-coast-barista-fire/): All five types for the same household: portfolio needed, age reached and what each one asks of you.
-- [Coast FIRE: how much you need by age](https://enoughpath.com/fire-by-age/coast-fire/): What coast FIRE means and the amount you need at 25, 30, 35, 40 and 45.
-- [Net worth by age in 2025: what the Fed's new survey shows](https://enoughpath.com/fire-by-age/net-worth-by-age-2025/): Median and average net worth by age from the Federal Reserve's 2025 survey, and what changed since 2022.
-- [How long will $1 million last in retirement?](https://enoughpath.com/withdrawal-strategies/how-long-will-1-million-last/): Years $1 million lasts by withdrawal and return, for $500,000 and $2 million too, and what two bad years at the start do.
-- [How much do you need to retire at 40?](https://enoughpath.com/fire-by-age/retire-at-40/): The portfolio you need by spending level for a 50-year retirement, what it takes to save it and how to bridge to 59½.
-- [Can you retire at 50 with $1, $2 or $3 million?](https://enoughpath.com/fire-by-age/retire-at-50-with-1-2-3-million/): What $1M, $2M and $3M pay each year from 50, how long each lasts at each spending level and what Social Security adds.
 - [How much do I need to retire?](https://enoughpath.com/fire-basics/how-much-do-i-need-to-retire/): Spending minus other income, divided by a withdrawal rate that fits the length of your retirement, with a table by spending.
-- [Average retirement savings by age in 2025](https://enoughpath.com/fire-by-age/average-retirement-savings-by-age/): Median and average 401(k) and IRA balances by age from the Fed's 2025 survey, and the share of families with any account.
-- [How many millionaires are in the US?](https://enoughpath.com/fire-by-age/how-many-millionaires-in-the-us/): Families with $1 million or more in net worth, by age and above $2, $5 and $10 million, from the Fed's 2025 survey.
-- [The rule of 55, explained](https://enoughpath.com/taxes-and-accounts/rule-of-55/): How the IRS exception for leaving a job at 55 works, which accounts it covers and what it does not do.
-- [72(t) SEPP rules, explained](https://enoughpath.com/taxes-and-accounts/72t-sepp/): The IRS methods, the rate cap, the 5-year-or-59½ rule and what breaking the schedule costs.
-- [The Roth conversion ladder, explained](https://enoughpath.com/taxes-and-accounts/roth-conversion-ladder/): Convert, wait five years, withdraw: how the ladder works under the IRS rules, with a five-year example.
+- [How to retire early, step by step](https://enoughpath.com/fire-basics/how-to-retire-early/): Spending, your number, savings rate, the bridge to 59½ and health insurance, with the math at each step.
+- [How much Social Security will I get if I make $X a year?](https://enoughpath.com/fire-basics/social-security-by-salary/): Monthly benefits at 62, 67 and 70 for salaries from $25,000 to $200,000, with the SSA's own formula.
+
+### Withdrawals
+- [How long will $1 million last in retirement?](https://enoughpath.com/withdrawal-strategies/how-long-will-1-million-last/): Years $1 million lasts by withdrawal and return, for $500,000 and $2 million too, and what two bad years at the start do.
 - [Sequence of returns risk, explained](https://enoughpath.com/withdrawal-strategies/sequence-of-returns-risk/): Same average return, different order: why a bad start does more damage, with the numbers and ways to manage it.
 - [Can I retire with $500K?](https://enoughpath.com/withdrawal-strategies/can-i-retire-with-500k/): What $500,000 pays a year, how long it lasts at each spending level and what Social Security adds.
 - [Safe withdrawal rate by retirement length](https://enoughpath.com/withdrawal-strategies/safe-withdrawal-rate/): Starting withdrawal rates for 30 to 50-year retirements, what they assume and what they mean for your portfolio.
+- [How much do you need to invest to make $1,000 a month?](https://enoughpath.com/withdrawal-strategies/how-much-to-invest-to-make-1000-a-month/): The amount invested for $500 to $10,000 a month, from dividends, interest or a withdrawal rate, and why the answers differ.
+
+### Taxes & accounts
+- [The rule of 55, explained](https://enoughpath.com/taxes-and-accounts/rule-of-55/): How the IRS exception for leaving a job at 55 works, which accounts it covers and what it does not do.
+- [72(t) SEPP rules, explained](https://enoughpath.com/taxes-and-accounts/72t-sepp/): The IRS methods, the rate cap, the 5-year-or-59½ rule and what breaking the schedule costs.
+- [The Roth conversion ladder, explained](https://enoughpath.com/taxes-and-accounts/roth-conversion-ladder/): Convert, wait five years, withdraw: how the ladder works under the IRS rules, with a five-year example.
+
+### FIRE by age
+- [Coast FIRE: how much you need by age](https://enoughpath.com/fire-by-age/coast-fire/): What coast FIRE means and the amount you need at 25, 30, 35, 40 and 45.
+- [Net worth by age in 2025: what the Fed's new survey shows](https://enoughpath.com/fire-by-age/net-worth-by-age-2025/): Median and average net worth by age from the Federal Reserve's 2025 survey, and what changed since 2022.
+- [How much do you need to retire at 40?](https://enoughpath.com/fire-by-age/retire-at-40/): The portfolio you need by spending level for a 50-year retirement, what it takes to save it and how to bridge to 59½.
+- [Can you retire at 50 with $1, $2 or $3 million?](https://enoughpath.com/fire-by-age/retire-at-50-with-1-2-3-million/): What $1M, $2M and $3M pay each year from 50, how long each lasts at each spending level and what Social Security adds.
+- [Average retirement savings by age in 2025](https://enoughpath.com/fire-by-age/average-retirement-savings-by-age/): Median and average 401(k) and IRA balances by age from the Fed's 2025 survey, and the share of families with any account.
+- [How many millionaires are in the US?](https://enoughpath.com/fire-by-age/how-many-millionaires-in-the-us/): Families with $1 million or more in net worth, by age and above $2, $5 and $10 million, from the Fed's 2025 survey.
 - [Fat FIRE: how much you need](https://enoughpath.com/fire-by-age/fat-fire/): The portfolio for a generous early retirement, from $100,000 to $250,000 a year, and the saving it takes.
 - [Barista FIRE, explained](https://enoughpath.com/fire-by-age/barista-fire/): Part-time income plus a smaller portfolio: the formula, worked examples and how it compares with coast FIRE.
 - [Lean FIRE: how much you need](https://enoughpath.com/fire-by-age/lean-fire/): The portfolio for a minimal early-retirement budget, how fast saving gets you there and what makes it fragile.
@@ -39,9 +68,6 @@ Returns typed before inflation are converted with the exact Fisher formula (7% w
 - [How much do I need to retire at 65?](https://enoughpath.com/fire-by-age/retire-at-65/): Savings for a 30-year retirement by spending level, with Medicare and the Social Security claiming choice.
 - [How much do I need to retire at 45?](https://enoughpath.com/fire-by-age/retire-at-45/): The portfolio for a 50-year retirement by spending level, the bridge to 59½ and where Social Security fits.
 - [Health insurance before Medicare](https://enoughpath.com/fire-by-age/health-insurance-before-medicare/): COBRA, the Marketplace, a spouse's plan or part-time work: the options until 65 and how they fit a retirement budget.
-- [How to retire early, step by step](https://enoughpath.com/fire-basics/how-to-retire-early/): Spending, your number, savings rate, the bridge to 59½ and health insurance, with the math at each step.
-- [How much Social Security will I get if I make $X a year?](https://enoughpath.com/fire-basics/social-security-by-salary/): Monthly benefits at 62, 67 and 70 for salaries from $25,000 to $200,000, with the SSA's own formula.
-- [How much do you need to invest to make $1,000 a month?](https://enoughpath.com/withdrawal-strategies/how-much-to-invest-to-make-1000-a-month/): The amount invested for $500 to $10,000 a month, from dividends, interest or a withdrawal rate, and why the answers differ.
 
 ## About
 - [Methodology](https://enoughpath.com/methodology/): every formula, default assumption and test.
