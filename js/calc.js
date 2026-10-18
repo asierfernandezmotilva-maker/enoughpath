@@ -1,13 +1,23 @@
 /* Calculadoras FIRE y coast FIRE: resultados, tabla y gráfico SVG. tools/generar.js usa las mismas funciones para dejar
    el ejemplo ya calculado en el HTML; en el navegador solo se repinta al cambiar un dato o si la URL trae un escenario (#...). */
-(function (root, f) { if (typeof module === "object") module.exports = f(require("./engine.js"), require("../lib/scf.js")); else root.EP_CALC = f(root.EP_ENGINE, root.EP_SCF); })(this, function (E, SCF) {
+(function (root, f) { if (typeof module === "object") module.exports = f(require("./engine.js"), require("../lib/scf.js"), require("../lib/irs.js"), require("../lib/cpi.js")); else root.EP_CALC = f(root.EP_ENGINE, root.EP_SCF, root.EP_IRS, root.EP_CPI); })(this, function (E, SCF, IRS, CPI) {
   var DEFAULTS = {
     fire: { v: "fire", lean: 25000, fire: 40000, fat: 100000, p: 100000, s: 25000, age: 35, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
     coast: { age: 35, ret: 65, spend: 40000, wr: 4, p: 100000, s: 15000, mode: "real", real: 5, nom: 7, inf: 3 },
     nw: { age: 35, nw: 150000 },
-    last: { p: 1000000, w: 40000, age: 45, mode: "real", real: 3, nom: 6, inf: 3 }
+    last: { p: 1000000, w: 40000, age: 45, mode: "real", real: 3, nom: 6, inf: 3 },
+    ci: { p: 10000, c: 500, rate: 7, t: 20, n: "12" },
+    r72: { rate: 8, p: 10000 },
+    nwc: { age: 35, cash: 15000, inv: 40000, ret: 90000, home: 350000, car: 20000, other: 0, mort: 250000, student: 20000, auto: 10000, cards: 3000, debt: 0 },
+    ssb: { pia: 2000, a: 62, b: 67 },
+    ef: { exp: 3000, m: "6", have: 5000, s: 500 },
+    re: { age: 30, p: 50000, s: 30000, spend: 50000, wr: 3.5, mode: "real", real: 5, nom: 7, inf: 3 },
+    bar: { age: 35, p: 150000, s: 20000, spend: 50000, inc: 25000, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
+    rmd: { age: 75, bal: 500000, rate: 5 },
+    sepp: { age: 50, bal: 500000, rate: 5 },
+    inf: { amt: 1000, from: 2000, to: 2025 }
   };
-  var CHOICES = { v: ["lean", "fire", "fat"], mode: ["real", "nominal"] };
+  var CHOICES = { v: ["lean", "fire", "fat"], mode: ["real", "nominal"], n: ["12", "1"], m: ["3", "6", "9", "12"] };
   var NAME = { lean: "Lean FIRE", fire: "FIRE", fat: "Fat FIRE" };
 
   var SIGNED = { nw: 1 }; // el patrimonio puede ser negativo (más deudas que bienes)
@@ -179,12 +189,140 @@
       data: "", note: ""
     };
   }
-  var HTML = { fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML };
+  // ---------- Oleada 3 ----------
+  function tbl(head, rows) { return '<table class="t"><thead><tr>' + head.map(function (h) { return '<th scope="col">' + h + "</th>"; }).join("") + "</tr></thead><tbody>" + rows.map(function (r) { return "<tr" + (r.on ? ' class="on"' : "") + ">" + r.map(function (c, i) { return i ? "<td>" + c + "</td>" : '<th scope="row">' + c + "</th>"; }).join("") + "</tr>"; }).join("") + "</tbody></table>"; }
+  function onRow(r, on) { r.on = on; return r; }
+  function bars(items) { var m = Math.max.apply(null, items.map(function (x) { return Math.abs(x[1]); }).concat([1])); return '<div class="bars">' + items.map(function (x) { return "<div><span>" + x[0] + '</span><p><i style="width:' + (Math.abs(x[1]) / m * 100).toFixed(1) + '%"><b>' + short(Math.abs(x[1])) + "</b></i></p></div>"; }).join("") + "</div>"; }
+
+  // Interés compuesto: aportación mensual; con capitalización anual se aportan 12 meses de golpe al final del año
+  function ci(v) { var n = +v.n, c = n === 1 ? v.c * 12 : v.c, r = v.rate / 100, at = function (t) { return E.compound(v.p, c, r, t, n); }; return { r: r, n: n, at: at, end: at(v.t), paid: v.p + v.c * 12 * Math.round(v.t) }; }
+  function ciHTML(v) {
+    var x = ci(v), T = Math.max(1, Math.round(v.t)), pts = [], put = [], rows = [];
+    for (var t = 0; t <= T; t++) { pts.push([t, x.at(t)]); put.push([t, v.p + v.c * 12 * t]); }
+    for (var y = 0; y <= T; y += T > 20 ? 10 : 5) rows.push(y); if (rows[rows.length - 1] !== T) rows.push(T);
+    var gain = x.end - x.paid;
+    return {
+      sign: sign("After " + T + (T === 1 ? " year" : " years"), "Your balance", usd(x.end), "You put in " + usd(x.paid) + "; interest adds " + usd(gain) + ".", "At " + pct(x.r) + " a year, compounded " + (x.n === 12 ? "monthly" : "yearly") + ". Before taxes, fees and inflation."),
+      chart: chart({ id: "ci", x0: 0, x1: T, ymax: Math.max(x.end, 1) * 1.1, lines: [{ pts: pts, cls: "you" }, { pts: put, cls: "need" }], hl: [], marks: [], title: "Balance and money put in over " + T + " years", desc: "The balance reaches " + usd(x.end) + " after " + T + " years, of which " + usd(x.paid) + " is money put in." }),
+      table: tbl(["Year", "Money put in", "Interest earned", "Balance"], rows.map(function (y) { var b = x.at(y), p = v.p + v.c * 12 * y; return onRow([y, usd(p), usd(b - p), usd(b)], y === T); })),
+      data: "", note: "Contributions are added at the end of each " + (x.n === 12 ? "month" : "year") + "."
+    };
+  }
+  // Regla del 72 frente al cálculo exacto
+  function r72HTML(v) {
+    var r = v.rate / 100, ex = E.doubling(r), q = E.rule72(r), ok = r > 0, H = ok ? Math.min(80, Math.ceil(ex * 3)) : 30, pts = [];
+    for (var t = 0; t <= H; t++) pts.push([t, v.p * Math.pow(1 + r, t)]);
+    var marks = ok ? [1, 2, 3].map(function (k) { return { x: ex * k, y: v.p * Math.pow(2, k), label: (ex * k).toFixed(1) }; }) : [];
+    return {
+      sign: sign(ok ? "72 ÷ " + +v.rate.toFixed(2) : "Not set", "Your money doubles in about", ok ? yrs(q) : "—", ok ? "Exact answer: " + ex.toFixed(2) + " years, " + Math.abs(q - ex).toFixed(2) + (q >= ex ? " more" : " less") + " than the rule." : "Enter a return above 0%.", ok ? usd(v.p) + " becomes " + usd(2 * v.p) + " in " + yrs(ex) + " and " + usd(4 * v.p) + " in " + yrs(2 * ex) + ", compounding once a year." : "Amounts are before inflation unless you enter a return after inflation."),
+      chart: chart({ id: "r72", x0: 0, x1: H, ymax: Math.max(pts[H][1], 1) * 1.1, lines: [{ pts: pts, cls: "you" }], hl: ok ? [{ y: 2 * v.p, label: "Doubled " + short(2 * v.p), cls: "on" }] : [], marks: marks, title: "Growth of " + usd(v.p) + " at " + pct(r) + " a year", desc: ok ? "It doubles every " + yrs(ex) + "." : "No growth." }),
+      table: tbl(["Return a year", "Rule of 72", "Exact", "Difference"], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15].map(function (k) { var e = E.doubling(k / 100), g = 72 / k; return onRow([k + "%", yrs(g), yrs(e), (g - e >= 0 ? "+" : "−") + Math.abs(g - e).toFixed(2)], k === +v.rate); })),
+      data: "", note: "Exact = ln 2 ÷ ln(1 + return), with one compounding a year."
+    };
+  }
+  // Patrimonio neto con desglose y percentil de la SCF 2025
+  var NWA = [["cash", "Cash and savings"], ["inv", "Investments"], ["ret", "Retirement accounts"], ["home", "Home"], ["car", "Vehicles"], ["other", "Other assets"]],
+    NWL = [["mort", "Mortgage"], ["student", "Student loans"], ["auto", "Car loans"], ["cards", "Credit cards"], ["debt", "Other debts"]];
+  function nwc(v) { var a = NWA.reduce(function (s, k) { return s + v[k[0]]; }, 0), l = NWL.reduce(function (s, k) { return s + v[k[0]]; }, 0); return { a: a, l: l, nw: a - l, rank: nw({ age: v.age, nw: a - l }) }; }
+  function nwcHTML(v) {
+    var x = nwc(v), r = x.rank;
+    return {
+      sign: sign(r.g[0] === "under-35" ? "Under 35" : "Ages " + r.g[1], "Your net worth", money(x.nw), usd(x.a) + " owned minus " + usd(x.l) + " owed.", rank(r.q) + " percentile among US families your age; the median is " + usd(r.median) + "."),
+      chart: bars([["What you own", x.a], ["What you owe", x.l], ["Net worth", x.nw]]),
+      table: tbl(["Item", "Amount"], NWA.map(function (k) { return [k[1], usd(v[k[0]])]; }).concat([onRow(["Total assets", usd(x.a)], true)], NWL.map(function (k) { return [k[1], usd(v[k[0]])]; }), [onRow(["Total debts", usd(x.l)], true), onRow(["Net worth", money(x.nw)], true)])),
+      data: "", note: "Percentile from the Federal Reserve's 2025 Survey of Consumer Finances, by age of the head of the family."
+    };
+  }
+  // Social Security: punto de equilibrio entre dos edades de cobro (edad completa 67, nacidos en 1960 o después)
+  function ssMonthly(pia, age) { return pia * E.ssFactor(Math.round((age - 67) * 12)); }
+  function ssb(v) { var a = Math.min(v.a, v.b), b = Math.max(v.a, v.b), ma = ssMonthly(v.pia, a), mb = ssMonthly(v.pia, b); return { a: a, b: b, ma: ma, mb: mb, be: mb > ma ? (b * mb - a * ma) / (mb - ma) : NaN }; }
+  function ssbHTML(v) {
+    var x = ssb(v), ok = v.pia > 0 && x.a >= 62 && x.b <= 70 && x.b > x.a && isFinite(x.be), cum = function (m, start, age) { return Math.max(0, age - start) * 12 * m; };
+    var pa = [], pb = []; for (var age = 62; age <= 95; age++) { pa.push([age, cum(x.ma, x.a, age)]); pb.push([age, cum(x.mb, x.b, age)]); }
+    return {
+      sign: sign(ok ? x.a + " vs " + x.b : "Not set", "Break-even age", ok ? x.be.toFixed(1) : "—", ok ? "Claiming at " + x.b + " (" + usd(x.mb) + " a month) pays more in total than at " + x.a + " (" + usd(x.ma) + " a month) if you live past " + x.be.toFixed(1) + "." : "Enter your full benefit and two claiming ages from 62 to 70.", "Full retirement age 67, for anyone born in 1960 or later. Amounts in today's dollars."),
+      chart: chart({ id: "ssb", x0: 62, x1: 95, ymax: Math.max(pa[33][1], pb[33][1], 1) * 1.1, area: false, lines: [{ pts: pa, cls: "need" }, { pts: pb, cls: "you" }], hl: [], marks: ok && x.be <= 95 ? [{ x: x.be, y: cum(x.mb, x.b, x.be), label: x.be.toFixed(1) }] : [], title: "Total benefits received by age, claiming at " + x.a + " and at " + x.b, desc: ok ? "The two totals meet at age " + x.be.toFixed(1) + "." : "" }),
+      table: tbl(["Claim at", "Share of full benefit", "A month", "Total by 80", "Total by 90"], [62, 63, 64, 65, 66, 67, 68, 69, 70].map(function (age) { var m = ssMonthly(v.pia, age); return onRow([age, pct(E.ssFactor(Math.round((age - 67) * 12))), usd(m), usd(cum(m, age, 80)), usd(cum(m, age, 90))], age === x.a || age === x.b); })),
+      data: "", note: "Reduction before 67: 5/9 of 1% a month for the first 36 months and 5/12 of 1% after that. Credits after 67: 2/3 of 1% a month up to 70."
+    };
+  }
+  // Fondo de emergencia
+  function efHTML(v) {
+    var m = +v.m, need = v.exp * m, gap = Math.max(0, need - v.have), cover = v.exp > 0 ? v.have / v.exp : 0, months = gap === 0 ? 0 : v.s > 0 ? Math.ceil(gap / v.s) : Infinity;
+    return {
+      sign: sign(m + " months", "Your emergency fund target", usd(need), v.exp > 0 ? "You have " + usd(v.have) + ", enough for " + cover.toFixed(1) + " months of essential costs." : "Enter your essential costs a month.", gap === 0 ? "You have reached it." : isFinite(months) ? "Saving " + usd(v.s) + " a month, you reach it in " + months + (months === 1 ? " month." : " months.") : "Add a monthly saving amount to see when you reach it."),
+      chart: bars([["You have", v.have], ["Target", need]]),
+      table: tbl(["Months covered", "Target", "Still to save", "Time at your saving"], [3, 6, 9, 12].map(function (k) { var g = Math.max(0, v.exp * k - v.have), t = g === 0 ? 0 : v.s > 0 ? Math.ceil(g / v.s) : Infinity; return onRow([k + " months", usd(v.exp * k), usd(g), t === 0 ? "Reached" : isFinite(t) ? t + " months" : "—"], k === m); })),
+      data: "", note: "Essential costs: housing, food, utilities, insurance, transport and minimum debt payments."
+    };
+  }
+  // Jubilación anticipada: edad a la que llegas y años de puente hasta los 59½ y Social Security
+  function re(v) { var r = rate(v), t = E.fireNumber(v.spend, v.wr / 100), n = E.yearsToTarget(v.p, v.s, r, t); return { r: r, target: t, years: n, age: v.age + n }; }
+  function reHTML(v) {
+    var x = re(v), ok = isFinite(x.years), H = ok ? Math.min(60, Math.max(10, Math.ceil(x.years) + 4)) : 40, pts = [];
+    for (var t = 0; t <= H; t++) pts.push([v.age + t, E.balance(v.p, v.s, x.r, t)]);
+    var bridge = ok ? Math.max(0, 59.5 - x.age) : NaN;
+    return {
+      sign: sign(ok ? "Age " + x.age.toFixed(1) : "Not reached", "You could retire at", ok ? x.age.toFixed(1) : "—", "When your portfolio reaches " + usd(x.target) + ": " + usd(v.spend) + " a year at a " + pct(v.wr / 100) + " withdrawal rate.", ok ? (bridge > 0 ? "That leaves " + yrs(bridge) + " before 59½, when retirement accounts open without the 10% additional tax." : "You would be past 59½ by then.") : "At these numbers the portfolio never gets there. Try a higher saving or a lower budget."),
+      chart: chart({ id: "re", x0: v.age, x1: v.age + H, ymax: Math.max(pts[H][1], x.target, 1) * 1.1, lines: [{ pts: pts, cls: "you" }], hl: [{ y: x.target, label: "Target " + short(x.target), cls: "on" }], marks: ok ? [{ x: x.age, y: x.target, label: x.age.toFixed(1) }] : [], title: "Portfolio growth from age " + v.age + " against the early retirement target", desc: ok ? "The portfolio reaches " + usd(x.target) + " at age " + x.age.toFixed(1) + "." : "The portfolio does not reach the target." }),
+      table: tbl(["Saving a year", "Retire at", "Years before 59½", "Years before 62"], [0.5, 1, 1.5, 2].map(function (k) { var n = E.yearsToTarget(v.p, v.s * k, x.r, x.target), a = v.age + n; return onRow([usd(v.s * k), isFinite(n) ? a.toFixed(1) : "Not reached", isFinite(n) ? Math.max(0, 59.5 - a).toFixed(1) : "—", isFinite(n) ? Math.max(0, 62 - a).toFixed(1) : "—"], k === 1); })),
+      data: "", note: rateNote(v)
+    };
+  }
+  // Barista FIRE: la cartera paga el gasto menos el ingreso a tiempo parcial
+  function bar(v) { var r = rate(v), t = E.baristaNumber(v.spend, v.inc, v.wr / 100), n = E.yearsToTarget(v.p, v.s, r, t), full = E.fireNumber(v.spend, v.wr / 100); return { r: r, target: t, years: n, age: v.age + n, full: full, fullYears: E.yearsToTarget(v.p, v.s, r, full) }; }
+  function barHTML(v) {
+    var x = bar(v), ok = isFinite(x.years), H = ok ? Math.min(60, Math.max(10, Math.ceil(isFinite(x.fullYears) ? x.fullYears : x.years) + 4)) : 40, pts = [];
+    for (var t = 0; t <= H; t++) pts.push([v.age + t, E.balance(v.p, v.s, x.r, t)]);
+    var marks = [[x.years, x.target], [x.fullYears, x.full]].filter(function (m) { return isFinite(m[0]) && m[0] <= H; }).map(function (m) { return { x: v.age + m[0], y: m[1], label: (v.age + m[0]).toFixed(1) }; });
+    return {
+      sign: sign(ok ? "Age " + x.age.toFixed(1) : "Not reached", "Barista FIRE number", usd(x.target), "(" + usd(v.spend) + " − " + usd(v.inc) + " part-time income) ÷ " + pct(v.wr / 100) + ".", ok ? "You reach it at " + x.age.toFixed(1) + (isFinite(x.fullYears) ? ", " + yrs(x.fullYears - x.years) + " before full FIRE at " + (v.age + x.fullYears).toFixed(1) + "." : ".") : "At these numbers the portfolio never gets there."),
+      chart: chart({ id: "bar", x0: v.age, x1: v.age + H, ymax: Math.max(pts[H][1], x.full, 1) * 1.1, lines: [{ pts: pts, cls: "you" }], hl: [{ y: x.target, label: "Barista " + short(x.target), cls: "on" }, { y: x.full, label: "Full FIRE " + short(x.full), cls: "" }], marks: marks, title: "Portfolio growth against the barista and full FIRE numbers", desc: ok ? "Barista FIRE at " + x.age.toFixed(1) + "." : "" }),
+      table: tbl(["Part-time income a year", "Portfolio needed", "Reached at"], [0, 10000, 20000, 30000, 40000].concat(v.inc).filter(function (k, i, a) { return a.indexOf(k) === i && k < v.spend; }).sort(function (a, b) { return a - b; }).map(function (k) { var tg = E.baristaNumber(v.spend, k, v.wr / 100), n = E.yearsToTarget(v.p, v.s, x.r, tg); return onRow([usd(k), usd(tg), isFinite(n) ? (v.age + n).toFixed(1) : "Not reached"], k === v.inc); })),
+      data: "", note: rateNote(v)
+    };
+  }
+  // RMD: saldo a 31 de diciembre ÷ divisor de la Uniform Lifetime Table (IRS Pub. 590-B, apéndice B, tabla III)
+  function div(table, age) { return table[String(Math.min(Math.round(age), 120))]; }
+  function rmdHTML(v) {
+    var ok = v.age >= 72 && v.bal > 0, d = ok ? div(IRS.uniform, v.age) : NaN, amt = v.bal / d, r = v.rate / 100, rows = [], b = v.bal, pts = [];
+    for (var a = Math.round(v.age), i = 0; ok && i <= 20 && a <= 120; a++, i++) { var dd = div(IRS.uniform, a), m = b / dd; pts.push([a, b]); if (i % 2 === 0 || i < 5) rows.push(onRow([a, dd.toFixed(1), usd(b), usd(m), pct(m / b)], i === 0)); b = (b - m) * (1 + r); }
+    return {
+      sign: sign(ok ? "Age " + Math.round(v.age) : "Not set", "Required minimum distribution", ok ? usd(amt) : "—", ok ? usd(v.bal) + " ÷ " + d.toFixed(1) + ", the IRS divisor for age " + Math.round(v.age) + "." : "The IRS table starts at age 72. RMDs begin at 73, or 75 depending on your date of birth.", ok ? "That is " + pct(amt / v.bal) + " of the balance this year; the share rises every year." : "Use the balance on December 31 of last year."),
+      chart: ok ? chart({ id: "rmd", x0: pts[0][0], x1: pts[pts.length - 1][0], ymax: Math.max.apply(null, pts.map(function (p) { return p[1]; }).concat([1])) * 1.1, lines: [{ pts: pts, cls: "you" }], hl: [], marks: [], title: "Account balance taking only the RMD each year", desc: "With " + pct(r) + " growth a year after each withdrawal." }) : "",
+      table: ok ? tbl(["Age", "IRS divisor", "Balance on Dec 31 before", "RMD", "Share"], rows) : "",
+      data: "", note: "Balance projected at " + pct(r) + " a year after each RMD, for illustration. Spouses more than 10 years younger use a different IRS table."
+    };
+  }
+  // 72(t): métodos de RMD y de amortización fija (IRS Notice 2022-6), con la esperanza de vida de la Single Life Table
+  function seppHTML(v) {
+    var ok = v.age >= 1 && v.age < 59.5 && v.bal > 0, le = ok ? div(IRS.single, v.age) : NaN, r = v.rate / 100, am = E.amortPayment(v.bal, r, le), rm = v.bal / le, years = Math.max(5, 59.5 - v.age);
+    return {
+      sign: sign(ok ? "Age " + v.age : "Not set", "Fixed amortization payment", ok ? usd(am) + " a year" : "—", ok ? "RMD method: " + usd(rm) + " in the first year, recalculated each year. Life expectancy used: " + le.toFixed(1) + " years." : "72(t) payments are for withdrawals before 59½. Enter an age under 59½.", ok ? "Payments must continue for " + yrs(years) + ", until " + (v.age + years).toFixed(1) + ". Changing them earlier brings back the 10% tax on past payments, plus interest." : "Single Life Expectancy Table, IRS Publication 590-B."),
+      chart: ok ? bars([["Amortization", am], ["RMD method", rm]]) : "",
+      table: ok ? tbl(["Interest rate", "Amortization a year", "A month"], [3, 4, 5, 6].concat(v.rate).filter(function (k, i, a) { return a.indexOf(k) === i; }).sort(function (a, b) { return a - b; }).map(function (k) { var p = E.amortPayment(v.bal, k / 100, le); return onRow([pct(k / 100), usd(p), usd(p / 12)], k === v.rate); })) : "",
+      data: "", note: "Illustration only. The rate may not exceed the greater of 5% or 120% of the federal mid-term rate for either of the two months before the first payment."
+    };
+  }
+  // Inflación: índice CPI-U de la BLS, media anual
+  function infHTML(v) {
+    var A = CPI.annual, y0 = Math.round(v.from), y1 = Math.round(v.to), ok = A[y0] && A[y1] && v.amt > 0, val = ok ? v.amt * A[y1] / A[y0] : NaN, n = y1 - y0;
+    var cum = ok ? A[y1] / A[y0] - 1 : NaN, avg = ok && n ? Math.pow(A[y1] / A[y0], 1 / n) - 1 : 0, pts = [], lo = Math.min(y0, y1), hi = Math.max(y0, y1);
+    for (var y = lo; ok && y <= hi; y++) pts.push([y, v.amt * A[y] / A[y0]]);
+    var step = hi - lo > 40 ? 10 : 5, rows = []; for (var yy = Math.ceil(lo / step) * step; ok && yy <= hi; yy += step) rows.push(yy); if (ok && rows.indexOf(hi) < 0) rows.push(hi);
+    return {
+      sign: sign(ok ? y0 + " → " + y1 : "Not set", usd(v.amt) + " in " + y0 + " equals", ok ? usd(val) : "—", ok ? "Prices " + (cum >= 0 ? "rose " : "fell ") + pct(Math.abs(cum)) + " in total" + (n ? ", " + pct(Math.abs(avg)) + " a year on average." : ".") : "Enter years from " + CPI.first + " to " + CPI.last + ".", "US consumer price index (CPI-U), annual averages from the Bureau of Labor Statistics."),
+      chart: ok && pts.length > 1 ? chart({ id: "inf", x0: lo, x1: hi, xstep: hi - lo > 40 ? 20 : hi - lo > 15 ? 5 : 2, ymax: Math.max.apply(null, pts.map(function (p) { return p[1]; }).concat([1])) * 1.1, lines: [{ pts: pts, cls: "you" }], hl: [], marks: [], title: "What " + usd(v.amt) + " of " + y0 + " is worth in each year's dollars", desc: ok ? usd(v.amt) + " in " + y0 + " is " + usd(val) + " in " + y1 + "." : "" }) : "",
+      table: ok ? tbl(["Year", "CPI-U", "Same buying power"], rows.map(function (y) { return onRow([y, A[y].toFixed(1), usd(v.amt * A[y] / A[y0])], y === y1); })) : "",
+      data: "", note: "Latest monthly figure: " + CPI.latest.value + " (" + CPI.latest.period + ")."
+    };
+  }
+  var HTML = { fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML, rmd: rmdHTML, sepp: seppHTML, inf: infHTML, ci: ciHTML, r72: r72HTML, nwc: nwcHTML, ssb: ssbHTML, ef: efHTML, re: reHTML, bar: barHTML };
 
   if (typeof document !== "undefined") Array.prototype.forEach.call(document.querySelectorAll("form[data-calc]"), function (f) {
     var kind = f.getAttribute("data-calc"), timer, sent = false;
     var render = function (v) { var h = HTML[kind](v); for (var k in h) { var el = document.getElementById(kind + "-" + k); if (el && el.innerHTML !== h[k]) el.innerHTML = h[k]; } };
-    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|w|lean|fire|fat|spend|nw)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
+    var write = function (v) { Object.keys(v).forEach(function (k) { var e = f.elements[k]; if (CHOICES[k]) Array.prototype.forEach.call(e, function (r) { r.checked = r.value === v[k]; }); else e.value = /^(p|s|w|lean|fire|fat|spend|nw|c|cash|inv|ret|home|car|other|mort|student|auto|cards|debt|pia|exp|have|inc|bal|amt)$/.test(k) ? v[k].toLocaleString("en-US") : v[k]; }); };
     if (location.hash.length > 1) { var v0 = fromHash(location.hash, kind); write(v0); render(v0); }
     f.addEventListener("input", function () {
       var v = read(f, kind); render(v); clearTimeout(timer);
@@ -201,5 +339,5 @@
   });
   if (typeof navigator !== "undefined" && "serviceWorker" in navigator && /^(https:|http:\/\/localhost)/.test(location.href)) navigator.serviceWorker.register("/sw.js").catch(function () {});
 
-  return { lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
+  return { ciHTML: ciHTML, r72HTML: r72HTML, nwcHTML: nwcHTML, ssbHTML: ssbHTML, efHTML: efHTML, reHTML: reHTML, barHTML: barHTML, rmdHTML: rmdHTML, seppHTML: seppHTML, infHTML: infHTML, ci: ci, nwc: nwc, ssb: ssb, ssMonthly: ssMonthly, re: re, bar: bar, lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
 });

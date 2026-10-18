@@ -66,6 +66,22 @@
     var path = withdrawPath(p, w, Array.apply(null, Array(n)).map(function () { return r; }));
     return path.length < n + 1 ? yearsLasts(p, w, r) : n + yearsLasts(path[n], Math.max(w - inc, 0), r);
   }
+  // Interés compuesto: p inicial, aportación c al final de cada periodo, tipo anual r, n periodos al año, t años
+  function compound(p, c, r, t, n) {
+    var k = Math.round(n * t), i = r / n, g = Math.pow(1 + i, k);
+    return p * g + (i === 0 ? c * k : c * (g - 1) / i);
+  }
+  // Años para doblar el dinero: exacto ln 2 / ln(1 + r) y la regla del 72 (72 / tipo en %)
+  function doubling(r) { return r > 0 ? Math.log(2) / Math.log(1 + r) : Infinity; }
+  function rule72(r) { return r > 0 ? 72 / (r * 100) : Infinity; }
+  // Pago anual constante que agota p en n años al tipo r (amortización, pagos a final de año)
+  function amortPayment(p, r, n) { return n > 0 ? (r === 0 ? p / n : p * r / (1 - Math.pow(1 + r, -n))) : NaN; }
+  // Social Security: parte de la pensión completa (PIA) según los meses antes (−) o después (+) de la edad completa.
+  // SSA: −5/9 del 1 % por mes los primeros 36 meses y −5/12 del 1 % los siguientes; +2/3 del 1 % por mes hasta los 70.
+  function ssFactor(m) {
+    if (m >= 0) return 1 + Math.min(m, 36) * 2 / 300;
+    var e = -m; return 1 - Math.min(e, 36) * 5 / 900 - Math.max(e - 36, 0) * 5 / 1200;
+  }
   // Media geométrica (la rentabilidad anual compuesta equivalente)
   function geoMean(returns) { return Math.pow(returns.reduce(function (a, r) { return a * (1 + r); }, 1), 1 / returns.length) - 1; }
   // Años que dura p retirando w al principio de cada año con una lista de rentabilidades. El último año parcial cuenta como
@@ -75,6 +91,6 @@
     for (var i = 0; i < returns.length; i++) { if (p < w) return i + p / w; p = (p - w) * (1 + returns[i]); }
     return p < w ? returns.length + p / w : Infinity;
   }
-  return { yearsWithIncome: yearsWithIncome, yearsOnPath: yearsOnPath, withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
+  return { compound: compound, doubling: doubling, rule72: rule72, amortPayment: amortPayment, ssFactor: ssFactor, yearsWithIncome: yearsWithIncome, yearsOnPath: yearsOnPath, withdrawPath: withdrawPath, geoMean: geoMean, percentileOf: percentileOf, savingNeeded: savingNeeded, yearsLasts: yearsLasts, fireNumber: fireNumber, baristaNumber: baristaNumber, realRate: realRate, futureDollars: futureDollars,
     balance: balance, yearsToTarget: yearsToTarget, coastNumber: coastNumber, yearsToCoast: yearsToCoast };
 });
