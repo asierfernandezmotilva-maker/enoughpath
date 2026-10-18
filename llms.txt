@@ -45,4 +45,4 @@ Returns typed before inflation are converted with the exact Fisher formula (7% w
 ## About
 - [Methodology](https://enoughpath.com/methodology/): every formula, default assumption and test.
 - [Editorial policy](https://enoughpath.com/editorial-policy/): how pages are written, checked against primary sources and corrected, including the use of AI.
-- [About](https://enoughpath.com/about/) and [disclaimer](https://enoughpath.com/disclaimer/). Contact: asierfernandezmotilva@gmail.com
+- [About](https://enoughpath.com/about/) and [disclaimer](https://enoughpath.com/disclaimer/). Contact: hola@enoughpath.com
