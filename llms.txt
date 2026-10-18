@@ -18,6 +18,8 @@ Returns typed before inflation are converted with the exact Fisher formula (7% w
 - [Coast FIRE: how much you need by age](https://enoughpath.com/fire-by-age/coast-fire/): What coast FIRE means and the amount you need at 25, 30, 35, 40 and 45.
 - [Net worth by age in 2025: what the Fed's new survey shows](https://enoughpath.com/fire-by-age/net-worth-by-age-2025/): Median and average net worth by age from the Federal Reserve's 2025 survey, and what changed since 2022.
 - [How long will $1 million last in retirement?](https://enoughpath.com/withdrawal-strategies/how-long-will-1-million-last/): Years $1 million lasts by withdrawal and return, for $500,000 and $2 million too, and what two bad years at the start do.
+- [How much do you need to retire at 40?](https://enoughpath.com/fire-by-age/retire-at-40/): The portfolio you need by spending level for a 50-year retirement, what it takes to save it and how to bridge to 59½.
+- [Can you retire at 50 with $1, $2 or $3 million?](https://enoughpath.com/fire-by-age/retire-at-50-with-1-2-3-million/): What $1M, $2M and $3M pay each year from 50, how long each lasts at each spending level and what Social Security adds.
 
 ## About
 - [Methodology](https://enoughpath.com/methodology/): every formula, default assumption and test.
