@@ -69,6 +69,9 @@ Returns typed before inflation are converted with the exact Fisher formula (7% w
 - [How much do I need to retire at 45?](https://enoughpath.com/fire-by-age/retire-at-45/): The portfolio for a 50-year retirement by spending level, the bridge to 59½ and where Social Security fits.
 - [Health insurance before Medicare](https://enoughpath.com/fire-by-age/health-insurance-before-medicare/): COBRA, the Marketplace, a spouse's plan or part-time work: the options until 65 and how they fit a retirement budget.
 
+## For your website
+- [Free FIRE calculators for your website](https://enoughpath.com/embed/): copy-and-paste iframes of the FIRE, coast FIRE and how long will my money last calculators, with a credit link; no ads, cookies or tracking inside.
+
 ## About
 - [Methodology](https://enoughpath.com/methodology/): every formula, default assumption and test.
 - [Editorial policy](https://enoughpath.com/editorial-policy/): how pages are written, checked against primary sources and corrected, including the use of AI.

@@ -443,7 +443,7 @@
       if (navigator.clipboard) navigator.clipboard.writeText(u).then(done, function () { prompt("Copy this link", u); }); else prompt("Copy this link", u);
     });
   });
-  if (typeof navigator !== "undefined" && "serviceWorker" in navigator && /^(https:|http:\/\/localhost)/.test(location.href)) navigator.serviceWorker.register("/sw.js").catch(function () {});
+  if (typeof window !== "undefined" && window.top === window && "serviceWorker" in navigator && /^(https:|http:\/\/localhost)/.test(location.href)) navigator.serviceWorker.register("/sw.js").catch(function () {});
 
   return { k401HTML: k401HTML, rothHTML: rothHTML, cdHTML: cdHTML, divHTML: divHTML, k401: k401, roth: roth, LIM: LIM, intHTML: intHTML, invHTML: invHTML, fvHTML: fvHTML, apyHTML: apyHTML, inv: inv, ciHTML: ciHTML, r72HTML: r72HTML, nwcHTML: nwcHTML, ssbHTML: ssbHTML, efHTML: efHTML, reHTML: reHTML, barHTML: barHTML, rmdHTML: rmdHTML, seppHTML: seppHTML, infHTML: infHTML, ci: ci, nwc: nwc, ssb: ssb, ssMonthly: ssMonthly, re: re, bar: bar, lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
 });
