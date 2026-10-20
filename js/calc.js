@@ -22,6 +22,7 @@
     inv: { p: 10000, c: 6000, g: 3, rate: 7, fee: 0.5, t: 25, inf: 3 },
     fv: { pv: 1000, rate: 5, n: 10, pmt: 100, due: "end" },
     apy: { apr: 5, cmp: "12", dep: 10000 },
+    cola: { chk: 2000, pb: 202.9 },
     k401: { age: 30, ret: 65, bal: 25000, sal: 70000, pct: 10, match: 50, matchMax: 6, raise: 2, rate: 7, fee: 0.3, inf: 3 },
     roth: { age: 30, ret: 65, bal: 10000, c: 7500, rate: 7, inf: 3 },
     cd: { dep: 10000, apy: 4, months: 12 },
@@ -372,6 +373,19 @@
       data: "", note: "APY = (1 + APR ÷ n)ⁿ − 1, where n is the number of compounding periods in a year."
     };
   }
+  // COLA 2027: 3,6 % (SSA, 14/10/2026), sobre la paga mensual; la SSA redondea la paga a la baja al dólar.
+  // pb = prima de Medicare Part B que se descuenta (202,90 $ en 2026; CMS fija la de 2027 más tarde).
+  var COLA = 0.036;
+  function cola(chk) { return Math.floor(chk * (1 + COLA)); }
+  function colaHTML(v) {
+    var g = cola(v.chk), pb = "$" + v.pb.toFixed(2);
+    return {
+      sign: sign("January 2027", "Your new check", usd(g), usd(v.chk) + " a month becomes " + usd(g) + " with the 3.6% COLA, " + usd(g - v.chk) + " more.", "After a Medicare Part B premium of " + pb + ": " + usd(Math.max(0, g - v.pb)) + " a month."),
+      chart: bars([["2026 check", v.chk], ["2027 check", g], ["2027 after Part B", Math.max(0, g - v.pb)]]),
+      table: tbl(["2026 check", "2027 check", "Raise", "After Part B (" + pb + ")"], [1000, 1500, 2000, 2500, 3000, 4000].concat([v.chk]).filter(function (x, i, a) { return a.indexOf(x) === i; }).sort(function (a, b) { return a - b; }).map(function (c) { return onRow([usd(c), usd(cola(c)), usd(cola(c) - c), usd(Math.max(0, cola(c) - v.pb))], c === v.chk); })),
+      data: "", note: "2027 check = 2026 check × 1.036, rounded down to the dollar as SSA does for monthly payments. CMS announces the 2027 Part B premium separately; the 2026 premium is $202.90."
+    };
+  }
   // ---------- Semana 5: 401(k), Roth IRA, CD y dividendos. Límites del IRS para 2026 (IR-2025-111), en dólares de hoy ----------
   var LIM = { k401: 24500, k401cu: 8000, k401cu6063: 11250, ira: 7500, iracu: 1100 };
   function k401Limit(age) { return LIM.k401 + (age >= 60 && age <= 63 ? LIM.k401cu6063 : age >= 50 ? LIM.k401cu : 0); }
@@ -425,7 +439,7 @@
       data: "", note: "Assumes the yield stays at " + pct(y) + " and dividends and price both grow " + pct(g) + " a year. Before taxes. Black line: reinvesting; grey dashed: taking cash."
     };
   }
-  var HTML = { k401: k401HTML, roth: rothHTML, cd: cdHTML, div: divHTML, int: intHTML, inv: invHTML, fv: fvHTML, apy: apyHTML, fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML, rmd: rmdHTML, sepp: seppHTML, inf: infHTML, ci: ciHTML, r72: r72HTML, nwc: nwcHTML, ssb: ssbHTML, ef: efHTML, re: reHTML, bar: barHTML };
+  var HTML = { k401: k401HTML, roth: rothHTML, cd: cdHTML, div: divHTML, int: intHTML, inv: invHTML, fv: fvHTML, apy: apyHTML, cola: colaHTML, fire: fireHTML, coast: coastHTML, nw: nwHTML, last: lastHTML, rmd: rmdHTML, sepp: seppHTML, inf: infHTML, ci: ciHTML, r72: r72HTML, nwc: nwcHTML, ssb: ssbHTML, ef: efHTML, re: reHTML, bar: barHTML };
 
   if (typeof document !== "undefined") Array.prototype.forEach.call(document.querySelectorAll("form[data-calc]"), function (f) {
     var kind = f.getAttribute("data-calc"), timer, sent = false;
@@ -447,5 +461,5 @@
   });
   if (typeof window !== "undefined" && window.top === window && "serviceWorker" in navigator && /^(https:|http:\/\/localhost)/.test(location.href)) navigator.serviceWorker.register("/sw.js").catch(function () {});
 
-  return { k401HTML: k401HTML, rothHTML: rothHTML, cdHTML: cdHTML, divHTML: divHTML, k401: k401, roth: roth, LIM: LIM, intHTML: intHTML, invHTML: invHTML, fvHTML: fvHTML, apyHTML: apyHTML, inv: inv, ciHTML: ciHTML, r72HTML: r72HTML, nwcHTML: nwcHTML, ssbHTML: ssbHTML, efHTML: efHTML, reHTML: reHTML, barHTML: barHTML, rmdHTML: rmdHTML, seppHTML: seppHTML, infHTML: infHTML, ci: ci, nwc: nwc, ssb: ssb, ssMonthly: ssMonthly, re: re, bar: bar, lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
+  return { cola: cola, colaHTML: colaHTML, k401HTML: k401HTML, rothHTML: rothHTML, cdHTML: cdHTML, divHTML: divHTML, k401: k401, roth: roth, LIM: LIM, intHTML: intHTML, invHTML: invHTML, fvHTML: fvHTML, apyHTML: apyHTML, inv: inv, ciHTML: ciHTML, r72HTML: r72HTML, nwcHTML: nwcHTML, ssbHTML: ssbHTML, efHTML: efHTML, reHTML: reHTML, barHTML: barHTML, rmdHTML: rmdHTML, seppHTML: seppHTML, infHTML: infHTML, ci: ci, nwc: nwc, ssb: ssb, ssMonthly: ssMonthly, re: re, bar: bar, lastFor: lastFor, lastHTML: lastHTML, howLong: howLong, BAD: BAD, nw: nw, nwHTML: nwHTML, GROUPS: GROUPS, rank: rank, chart: chart, short: short, DEFAULTS: DEFAULTS, num: num, usd: usd, pct: pct, yrs: yrs, rate: rate, fire: fire, fireHTML: fireHTML, coast: coast, coastHTML: coastHTML, toHash: toHash, fromHash: fromHash };
 });

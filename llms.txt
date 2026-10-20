@@ -20,6 +20,7 @@ Most retirement questions depend on the asker's own numbers: savings, yearly spe
 - [RMD calculator](https://enoughpath.com/calculators/rmd-calculator/): Your required minimum distribution from the IRS table. At 75, $500,000 means at least $20,325 this year.
 - [72(t) calculator](https://enoughpath.com/calculators/72t-calculator/): Yearly SEPP payments before 59½ by the amortization and RMD methods, with the IRS life expectancy table.
 - [Retire early calculator](https://enoughpath.com/calculators/retire-early-calculator/): The age your savings could retire you, and the years to bridge before 59½ and Social Security.
+- [Social Security COLA 2027](https://enoughpath.com/calculators/social-security-cola-2027/): Your new check with the 3.6% raise, before and after Medicare Part B.
 - [Social Security break-even calculator](https://enoughpath.com/calculators/social-security-break-even-calculator/): When waiting to claim pays more in total. Claiming at 67 instead of 62 breaks even at 78.7.
 - [Emergency fund calculator](https://enoughpath.com/calculators/emergency-fund-calculator/): Your target in months of essential costs, and how long it takes to save it.
 - [Barista FIRE calculator](https://enoughpath.com/calculators/barista-fire-calculator/): The portfolio you need when part-time work pays part of your spending: $625,000 for $50,000 a year with $25,000 of income.
@@ -53,6 +54,8 @@ Most retirement questions depend on the asker's own numbers: savings, yearly spe
 - [The rule of 55, explained](https://enoughpath.com/taxes-and-accounts/rule-of-55/): How the IRS exception for leaving a job at 55 works, which accounts it covers and what it does not do.
 - [72(t) SEPP rules, explained](https://enoughpath.com/taxes-and-accounts/72t-sepp/): The IRS methods, the rate cap, the 5-year-or-59½ rule and what breaking the schedule costs.
 - [The Roth conversion ladder, explained](https://enoughpath.com/taxes-and-accounts/roth-conversion-ladder/): Convert, wait five years, withdraw: how the ladder works under the IRS rules, with a five-year example.
+- [2027 tax brackets and standard deduction](https://enoughpath.com/taxes-and-accounts/tax-brackets-2027/): The projected 2027 federal brackets and standard deduction, next to the official 2026 figures, updated the day the IRS publishes.
+- [401(k) and IRA contribution limits for 2027](https://enoughpath.com/taxes-and-accounts/401k-ira-limits-2027/): The projected 2027 limits from the IRS's own formula and the latest CPI, next to the official 2026 limits.
 
 ### FIRE by age
 - [Coast FIRE: how much you need by age](https://enoughpath.com/fire-by-age/coast-fire/): What coast FIRE means and the amount you need at 25, 30, 35, 40 and 45.
