@@ -1,6 +1,8 @@
 /* Calculadoras FIRE y coast FIRE: resultados, tabla y gráfico SVG. tools/generar.js usa las mismas funciones para dejar
    el ejemplo ya calculado en el HTML; en el navegador solo se repinta al cambiar un dato o si la URL trae un escenario (#...). */
 (function (root, f) { if (typeof module === "object") module.exports = f(require("./engine.js"), require("../lib/scf.js"), require("../lib/irs.js"), require("../lib/cpi.js")); else root.EP_CALC = f(root.EP_ENGINE, root.EP_SCF, root.EP_IRS, root.EP_CPI); })(this, function (E, SCF, IRS, CPI) {
+  // Año en curso: la última cifra mensual de la BLS sustituye a la media anual que aún no existe.
+  var CPI_LY = +CPI.latest.period.slice(0, 4), CPI_ALL = Object.assign({}, CPI.annual); if (!CPI_ALL[CPI_LY]) CPI_ALL[CPI_LY] = CPI.latest.value;
   var DEFAULTS = {
     fire: { v: "fire", lean: 25000, fire: 40000, fat: 100000, p: 100000, s: 25000, age: 35, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
     coast: { age: 35, ret: 65, spend: 40000, wr: 4, p: 100000, s: 15000, mode: "real", real: 5, nom: 7, inf: 3 },
@@ -15,7 +17,7 @@
     bar: { age: 35, p: 150000, s: 20000, spend: 50000, inc: 25000, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
     rmd: { age: 75, bal: 500000, rate: 5 },
     sepp: { age: 50, bal: 500000, rate: 5 },
-    inf: { amt: 1000, from: 2000, to: 2025 },
+    inf: { amt: 1000, from: 2000, to: +CPI.latest.period.slice(0, 4) },
     int: { p: 10000, rate: 5, t: 5 },
     inv: { p: 10000, c: 6000, g: 3, rate: 7, fee: 0.5, t: 25, inf: 3 },
     fv: { pv: 1000, rate: 5, n: 10, pmt: 100, due: "end" },
@@ -314,15 +316,15 @@
   }
   // Inflación: índice CPI-U de la BLS, media anual
   function infHTML(v) {
-    var A = CPI.annual, y0 = Math.round(v.from), y1 = Math.round(v.to), ok = A[y0] && A[y1] && v.amt > 0, val = ok ? v.amt * A[y1] / A[y0] : NaN, n = y1 - y0;
+    var A = CPI_ALL, y0 = Math.round(v.from), y1 = Math.round(v.to), ok = A[y0] && A[y1] && v.amt > 0, val = ok ? v.amt * A[y1] / A[y0] : NaN, n = y1 - y0;
     var cum = ok ? A[y1] / A[y0] - 1 : NaN, avg = ok && n ? Math.pow(A[y1] / A[y0], 1 / n) - 1 : 0, pts = [], lo = Math.min(y0, y1), hi = Math.max(y0, y1);
     for (var y = lo; ok && y <= hi; y++) pts.push([y, v.amt * A[y] / A[y0]]);
     var step = hi - lo > 40 ? 10 : 5, rows = []; for (var yy = Math.ceil(lo / step) * step; ok && yy <= hi; yy += step) rows.push(yy); if (ok && rows.indexOf(hi) < 0) rows.push(hi);
     return {
-      sign: sign(ok ? y0 + " → " + y1 : "Not set", usd(v.amt) + " in " + y0 + " equals", ok ? usd(val) : "—", ok ? "Prices " + (cum >= 0 ? "rose " : "fell ") + pct(Math.abs(cum)) + " in total" + (n ? ", " + pct(Math.abs(avg)) + " a year on average." : ".") : "Enter years from " + CPI.first + " to " + CPI.last + ".", "US consumer price index (CPI-U), annual averages from the Bureau of Labor Statistics."),
+      sign: sign(ok ? y0 + " → " + y1 : "Not set", usd(v.amt) + " in " + y0 + " equals", ok ? usd(val) : "—", ok ? "Prices " + (cum >= 0 ? "rose " : "fell ") + pct(Math.abs(cum)) + " in total" + (n ? ", " + pct(Math.abs(avg)) + " a year on average." : ".") : "Enter years from " + CPI.first + " to " + CPI_LY + ".", "US consumer price index (CPI-U), annual averages from the Bureau of Labor Statistics."),
       chart: ok && pts.length > 1 ? chart({ id: "inf", x0: lo, x1: hi, xstep: hi - lo > 40 ? 20 : hi - lo > 15 ? 5 : 2, ymax: Math.max.apply(null, pts.map(function (p) { return p[1]; }).concat([1])) * 1.1, lines: [{ pts: pts, cls: "you" }], hl: [], marks: [], title: "What " + usd(v.amt) + " of " + y0 + " is worth in each year's dollars", desc: ok ? usd(v.amt) + " in " + y0 + " is " + usd(val) + " in " + y1 + "." : "" }) : "",
       table: ok ? tbl(["Year", "CPI-U", "Same buying power"], rows.map(function (y) { return onRow([y, A[y].toFixed(1), usd(v.amt * A[y] / A[y0])], y === y1); })) : "",
-      data: "", note: "Latest monthly figure: " + CPI.latest.value + " (" + CPI.latest.period + ")."
+      data: "", note: (y0 === CPI_LY || y1 === CPI_LY) && !CPI.annual[CPI_LY] ? CPI_LY + " uses the latest monthly figure, " + CPI.latest.value + " for " + CPI.latest.period + "; the other years are annual averages." : "Latest monthly figure: " + CPI.latest.value + " (" + CPI.latest.period + ")."
     };
   }
   // Interés simple frente a compuesto
