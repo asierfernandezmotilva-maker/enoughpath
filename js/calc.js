@@ -2,6 +2,7 @@
    el ejemplo ya calculado en el HTML; en el navegador solo se repinta al cambiar un dato o si la URL trae un escenario (#...). */
 (function (root, f) { if (typeof module === "object") module.exports = f(require("./engine.js"), require("../lib/scf.js"), require("../lib/irs.js"), require("../lib/cpi.js")); else root.EP_CALC = f(root.EP_ENGINE, root.EP_SCF, root.EP_IRS, root.EP_CPI); })(this, function (E, SCF, IRS, CPI) {
   // Año en curso: la última cifra mensual de la BLS sustituye a la media anual que aún no existe.
+  CPI = CPI || { annual: {}, latest: { period: "0", value: 0 } }; // cpi.js solo se carga en la calculadora de inflación
   var CPI_LY = +CPI.latest.period.slice(0, 4), CPI_ALL = Object.assign({}, CPI.annual); if (!CPI_ALL[CPI_LY]) CPI_ALL[CPI_LY] = CPI.latest.value;
   var DEFAULTS = {
     fire: { v: "fire", lean: 25000, fire: 40000, fat: 100000, p: 100000, s: 25000, age: 35, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
@@ -17,7 +18,7 @@
     bar: { age: 35, p: 150000, s: 20000, spend: 50000, inc: 25000, wr: 4, mode: "real", real: 5, nom: 7, inf: 3 },
     rmd: { age: 75, bal: 500000, rate: 5 },
     sepp: { age: 50, bal: 500000, rate: 5 },
-    inf: { amt: 1000, from: 2000, to: +CPI.latest.period.slice(0, 4) },
+    inf: { amt: 1000, from: 2000, to: CPI_LY },
     int: { p: 10000, rate: 5, t: 5 },
     inv: { p: 10000, c: 6000, g: 3, rate: 7, fee: 0.5, t: 25, inf: 3 },
     fv: { pv: 1000, rate: 5, n: 10, pmt: 100, due: "end" },
