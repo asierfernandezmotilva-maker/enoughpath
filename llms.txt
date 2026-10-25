@@ -60,7 +60,7 @@ Most retirement questions depend on the asker's own numbers: savings, yearly spe
 ### FIRE by age
 - [Coast FIRE: how much you need by age](https://enoughpath.com/fire-by-age/coast-fire/): What coast FIRE means and the amount you need at 25, 30, 35, 40 and 45.
 - [Net worth by age in 2025: what the Fed's new survey shows](https://enoughpath.com/fire-by-age/net-worth-by-age-2025/): Median and average net worth by age from the Federal Reserve's 2025 survey, and what changed since 2022.
-- [How much do you need to retire at 40?](https://enoughpath.com/fire-by-age/retire-at-40/): The portfolio you need by spending level for a 50-year retirement, what it takes to save it and how to bridge to 59½.
+- [How much do you need to retire at 40 or 45?](https://enoughpath.com/fire-by-age/retire-at-40/): The portfolio for a 50-year retirement by spending level, what retiring at 45 instead changes, and how to bridge to 59½.
 - [Can you retire at 50 with $1, $2 or $3 million?](https://enoughpath.com/fire-by-age/retire-at-50-with-1-2-3-million/): What $1M, $2M and $3M pay each year from 50, how long each lasts at each spending level and what Social Security adds.
 - [Average retirement savings by age in 2025](https://enoughpath.com/fire-by-age/average-retirement-savings-by-age/): Median and average 401(k) and IRA balances by age from the Fed's 2025 survey, and the share of families with any account.
 - [How many millionaires are in the US?](https://enoughpath.com/fire-by-age/how-many-millionaires-in-the-us/): Families with $1 million or more in net worth, by age and above $2, $5 and $10 million, from the Fed's 2025 survey.
@@ -68,11 +68,10 @@ Most retirement questions depend on the asker's own numbers: savings, yearly spe
 - [Barista FIRE, explained](https://enoughpath.com/fire-by-age/barista-fire/): Part-time income plus a smaller portfolio: the formula, worked examples and how it compares with coast FIRE.
 - [Lean FIRE: how much you need](https://enoughpath.com/fire-by-age/lean-fire/): The portfolio for a minimal early-retirement budget, how fast saving gets you there and what makes it fragile.
 - [How much should I have saved by 30, 40, 50 and 60?](https://enoughpath.com/fire-by-age/how-much-should-i-have-saved-by-age/): Fidelity's salary multiples by age, what US families actually hold and a target from your own spending.
-- [How much do I need to retire at 55?](https://enoughpath.com/fire-by-age/retire-at-55/): The portfolio for a 40-year retirement by spending level, with the rule of 55 and Social Security.
-- [How much do I need to retire at 60?](https://enoughpath.com/fire-by-age/retire-at-60/): The portfolio for a 35-year retirement by spending level, with Social Security from 62 or 67.
-- [Can I retire at 62?](https://enoughpath.com/fire-by-age/retire-at-62/): What claiming Social Security at 62 pays, the savings you need and the three years before Medicare.
-- [How much do I need to retire at 65?](https://enoughpath.com/fire-by-age/retire-at-65/): Savings for a 30-year retirement by spending level, with Medicare and the Social Security claiming choice.
-- [How much do I need to retire at 45?](https://enoughpath.com/fire-by-age/retire-at-45/): The portfolio for a 50-year retirement by spending level, the bridge to 59½ and where Social Security fits.
+- [How much do I need to retire at 55?](https://enoughpath.com/fire-by-age/retire-at-55/): The portfolio for a 40-year retirement, a worked example that uses the rule of 55, and the ten years before Medicare.
+- [How much do I need to retire at 60?](https://enoughpath.com/fire-by-age/retire-at-60/): The portfolio for a 35-year retirement, what 59½ opens, and when to claim Social Security with $1 million.
+- [Can I retire at 62?](https://enoughpath.com/fire-by-age/retire-at-62/): What claiming Social Security at 62 pays, a worked example with $750,000, and the three years before Medicare.
+- [How much do I need to retire at 65?](https://enoughpath.com/fire-by-age/retire-at-65/): Savings for a 30-year retirement, Medicare enrollment, the tax breaks that start at 65 and a worked claiming example.
 - [Health insurance before Medicare](https://enoughpath.com/fire-by-age/health-insurance-before-medicare/): COBRA, the Marketplace, a spouse's plan or part-time work: the options until 65 and how they fit a retirement budget.
 
 ## For your website
