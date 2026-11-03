@@ -42,6 +42,7 @@ Most retirement questions depend on the asker's own numbers: savings, yearly spe
 - [How much do I need to retire?](https://enoughpath.com/fire-basics/how-much-do-i-need-to-retire/): Spending minus other income, divided by a withdrawal rate that fits the length of your retirement, with a table by spending.
 - [How to retire early, step by step](https://enoughpath.com/fire-basics/how-to-retire-early/): Spending, your number, savings rate, the bridge to 59½ and health insurance, with the math at each step.
 - [How much Social Security will I get if I make $X a year?](https://enoughpath.com/fire-basics/social-security-by-salary/): Monthly benefits at 62, 67 and 70 for salaries from $25,000 to $200,000, with the SSA's own formula.
+- [What is the average Social Security benefit?](https://enoughpath.com/fire-basics/average-social-security-benefit/): The average check by type of benefit, by age and sex, early versus full retirement age, and what it covers.
 
 ### Withdrawals
 - [How long will $1 million last in retirement?](https://enoughpath.com/withdrawal-strategies/how-long-will-1-million-last/): Years $1 million lasts by withdrawal and return, for $500,000 and $2 million too, and what two bad years at the start do.
@@ -72,6 +73,7 @@ Most retirement questions depend on the asker's own numbers: savings, yearly spe
 - [How much do I need to retire at 60?](https://enoughpath.com/fire-by-age/retire-at-60/): The portfolio for a 35-year retirement, what 59½ opens, and when to claim Social Security with $1 million.
 - [Can I retire at 62?](https://enoughpath.com/fire-by-age/retire-at-62/): What claiming Social Security at 62 pays, a worked example with $750,000, and the three years before Medicare.
 - [How much do I need to retire at 65?](https://enoughpath.com/fire-by-age/retire-at-65/): Savings for a 30-year retirement, Medicare enrollment, the tax breaks that start at 65 and a worked claiming example.
+- [Is $1.5 million enough to retire?](https://enoughpath.com/fire-by-age/is-1-5-million-enough-to-retire/): What $1.5 million pays a year at 55, 60, 62 and 65, how long it lasts at each spending level and a worked Social Security example.
 - [Health insurance before Medicare](https://enoughpath.com/fire-by-age/health-insurance-before-medicare/): COBRA, the Marketplace, a spouse's plan or part-time work: the options until 65 and how they fit a retirement budget.
 
 ## For your website
