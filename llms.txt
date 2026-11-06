@@ -55,7 +55,7 @@ Most retirement questions depend on the asker's own numbers: savings, yearly spe
 - [The rule of 55, explained](https://enoughpath.com/taxes-and-accounts/rule-of-55/): How the IRS exception for leaving a job at 55 works, which accounts it covers and what it does not do.
 - [72(t) SEPP rules, explained](https://enoughpath.com/taxes-and-accounts/72t-sepp/): The IRS methods, the rate cap, the 5-year-or-59½ rule and what breaking the schedule costs.
 - [The Roth conversion ladder, explained](https://enoughpath.com/taxes-and-accounts/roth-conversion-ladder/): Convert, wait five years, withdraw: how the ladder works under the IRS rules, with a five-year example.
-- [2027 tax brackets and standard deduction](https://enoughpath.com/taxes-and-accounts/tax-brackets-2027/): The projected 2027 federal brackets and standard deduction, next to the official 2026 figures, updated the day the IRS publishes.
+- [2027 tax brackets and standard deduction](https://enoughpath.com/taxes-and-accounts/tax-brackets-2027/): The official 2027 federal brackets and standard deduction from the IRS, next to the 2026 figures, with what they mean for a $75,000 income.
 - [401(k) and IRA contribution limits for 2027](https://enoughpath.com/taxes-and-accounts/401k-ira-limits-2027/): The projected 2027 limits from the IRS's own formula and the latest CPI, next to the official 2026 limits.
 
 ### FIRE by age
