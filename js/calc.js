@@ -23,7 +23,7 @@
     inv: { p: 10000, c: 6000, g: 3, rate: 7, fee: 0.5, t: 25, inf: 3 },
     fv: { pv: 1000, rate: 5, n: 10, pmt: 100, due: "end" },
     apy: { apr: 5, cmp: "12", dep: 10000 },
-    cola: { chk: 2000, pb: 202.9 },
+    cola: { chk: 2000, pb: 209.4 },
     k401: { age: 30, ret: 65, bal: 25000, sal: 70000, pct: 10, match: 50, matchMax: 6, raise: 2, rate: 7, fee: 0.3, inf: 3 },
     roth: { age: 30, ret: 65, bal: 10000, c: 7500, rate: 7, inf: 3 },
     cd: { dep: 10000, apy: 4, months: 12 },
@@ -375,16 +375,16 @@
     };
   }
   // COLA 2027: 3,6 % (SSA, 14/10/2026), sobre la paga mensual; la SSA redondea la paga a la baja al dólar.
-  // pb = prima de Medicare Part B que se descuenta (202,90 $ en 2026; CMS fija la de 2027 más tarde).
+  // pb = prima de Medicare Part B que se descuenta: 209,40 $ en 2027 (CMS, 17/11/2026); 202,90 $ en 2026.
   var COLA = 0.036;
   function cola(chk) { return Math.floor(chk * (1 + COLA)); }
   function colaHTML(v) {
     var g = cola(v.chk), pb = "$" + v.pb.toFixed(2);
     return {
-      sign: sign("January 2027", "Your new check", usd(g), usd(v.chk) + " a month becomes " + usd(g) + " with the 3.6% COLA, " + usd(g - v.chk) + " more.", "After a Medicare Part B premium of " + pb + ": " + usd(Math.max(0, g - v.pb)) + " a month."),
-      chart: bars([["2026 check", v.chk], ["2027 check", g], ["2027 after Part B", Math.max(0, g - v.pb)]]),
-      table: tbl(["2026 check", "2027 check", "Raise", "After Part B (" + pb + ")"], [1000, 1500, 2000, 2500, 3000, 4000].concat([v.chk]).filter(function (x, i, a) { return a.indexOf(x) === i; }).sort(function (a, b) { return a - b; }).map(function (c) { return onRow([usd(c), usd(cola(c)), usd(cola(c) - c), usd(Math.max(0, cola(c) - v.pb))], c === v.chk); })),
-      data: "", note: "2027 check = 2026 check × 1.036, rounded down to the dollar as SSA does for monthly payments. CMS announces the 2027 Part B premium separately; the 2026 premium is $202.90."
+      sign: sign("January 2027", "Your new check", usd(g), usd(v.chk) + " a month becomes " + usd(g) + " with the 3.6% COLA, " + usd(g - v.chk) + " more.", "After a Medicare Part B premium of " + pb + ": " + usd(Math.max(0, Math.floor(g - v.pb))) + " a month."),
+      chart: bars([["2026 check", v.chk], ["2027 check", g], ["2027 after Part B", Math.max(0, Math.floor(g - v.pb))]]),
+      table: tbl(["2026 check", "2027 check", "Raise", "After Part B (" + pb + ")"], [1000, 1500, 2000, 2500, 3000, 4000].concat([v.chk]).filter(function (x, i, a) { return a.indexOf(x) === i; }).sort(function (a, b) { return a - b; }).map(function (c) { return onRow([usd(c), usd(cola(c)), usd(cola(c) - c), usd(Math.max(0, Math.floor(cola(c) - v.pb)))], c === v.chk); })),
+      data: "", note: "2027 check = 2026 check × 1.036, rounded down to the dollar as SSA does for monthly payments. The standard Part B premium is $209.40 in 2027 (CMS, November 17, 2026), up from $202.90 in 2026."
     };
   }
   // ---------- Semana 5: 401(k), Roth IRA, CD y dividendos. Límites del IRS para 2026 (IR-2025-111), en dólares de hoy ----------
